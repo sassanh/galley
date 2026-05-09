@@ -76,7 +76,7 @@ pub const reduction_Id = summerize;
 pub const reduction_Operator = summerize;
 pub const reduction_String = summerize;
 
-fn drop_self(args: *ProcedureArguments) void {
+pub fn drop_self(args: *ProcedureArguments) void {
     args.node = null;
 }
 
@@ -87,11 +87,17 @@ pub fn reduction_Space(args: *ProcedureArguments) !void {
     _ = try args.node.?.clean_children(args.allocator);
 }
 
-fn to_character(character: u8) type {
+fn to_character(character: u8, ignore_empty: bool) type {
     return struct {
         fn function(args: *ProcedureArguments) !void {
             if (args.node) |node| {
                 _ = try node.clean_children(args.allocator);
+                if (ignore_empty) {
+                    if (node.children.len == 0) {
+                        args.node = null;
+                        return;
+                    }
+                }
                 const spaces = try args.allocator.alloc(u8, if (character == '\n') indent * 2 + 1 else 1);
                 @memset(spaces, ' ');
                 spaces[0] = character;
@@ -101,12 +107,12 @@ fn to_character(character: u8) type {
     };
 }
 
-pub const reduction_OptionalBlankAndNewLine = to_character(' ').function;
-pub const reduction_OptionalNewLineMany = to_character('\n').function;
-pub const reduction_ForceNewLineMany = to_character('\n').function;
-pub const reduction_NewLine = to_character('\n').function;
+pub const reduction_OptionalBlankAndNewLine = to_character(' ', false).function;
+pub const reduction_OptionalNewLineMany = to_character('\n', false).function;
+pub const reduction_ForceNewLineMany = to_character('\n', false).function;
+pub const reduction_new_line = to_character('\n', false).function;
 
-fn drop_children(args: *ProcedureArguments) !void {
+pub fn drop_children(args: *ProcedureArguments) !void {
     _ = try args.node.?.clean_children(args.allocator);
 }
 
@@ -116,36 +122,36 @@ pub const reduction_IntegerNumber = drop_children;
 pub const reduction_Number = drop_children;
 pub const reduction_text = drop_children;
 
-fn block_edge(parse_id: comptime_int, indent_impact: comptime_int) type {
+fn block_edge(parse_id: comptime_int) type {
     return struct {
         fn function(args: *ProcedureArguments) !void {
-            _ = try args.node.?.remove_child(args.allocator, 0);
-            if (indent_impact < 0) {
-                indent -= -indent_impact;
-            } else {
-                indent += indent_impact;
-            }
+            if (parse_id == block_start_id) indent += 1 else indent -= 1;
 
             const spaces = try args.allocator.alloc(u8, indent * 2 + 1);
             @memset(spaces, ' ');
             spaces[0] = '\n';
             args.node.?.text = spaces;
+            args.node.?.label = if (parse_id == block_start_id) "BlockStart" else "BlockEnd";
 
             args.node.?.payload.parse_id = parse_id;
         }
     };
 }
 
-pub const reduction_BlockStart = block_edge(block_start_id, 1).function;
-pub const reduction_BlockEnd = block_edge(block_end_id, -1).function;
+pub const reduction_block_start = block_edge(block_start_id).function;
+pub const reduction_block_end = block_edge(block_end_id).function;
 
-fn replace_with_child(args: *ProcedureArguments) !void {
-    args.node = (try args.node.?.clean_children(args.allocator))[0];
+pub fn replace_with_children(args: *ProcedureArguments) !void {
+    if (args.node) |node| {
+        const removed_children = try node.clean_children(args.allocator);
+        if (removed_children.len > 0) args.node = removed_children[0] else args.node = null;
+    }
 }
 
-pub const reduction_Operand = replace_with_child;
-pub const reduction_Expression_1 = replace_with_child;
-pub const reduction_OperandAndNumber = replace_with_child;
+pub const reduction_Operand = replace_with_children;
+pub const reduction_Expression_1 = replace_with_children;
+pub const reduction_OperandAndNumber = replace_with_children;
+pub const reduction_ActionBody = replace_with_children;
 
 pub fn reduction_ActionOutcomeEntry(args: *ProcedureArguments) !void {
     args.node = (try args.node.?.remove_child(args.allocator, 0));
@@ -156,20 +162,22 @@ pub fn reduction_FieldRow(args: *ProcedureArguments) void {
     args.node.?.payload.fields = 1;
 }
 
-fn right_recursive_reduction(args: *ProcedureArguments) !void {
+pub fn right_recursive_reduction(args: *ProcedureArguments) !void {
     if (args.node) |node| {
-        const removing_node = try node.remove_child(args.allocator, node.children.len - 1);
-        if (removing_node.children.len > 0) {
-            try node.insert_children(
-                args.allocator,
-                0,
-                (try removing_node.clean_children(args.allocator))[0],
-            );
+        if (node.children.len > 1) {
+            try reduction(args);
+            const removing_node = try node.remove_child(args.allocator, node.children.len - 1);
+            if (removing_node.children.len > 0) {
+                try node.append_children(
+                    args.allocator,
+                    (try removing_node.clean_children(args.allocator))[0],
+                );
+            }
         }
     }
 }
 
-pub const reduction_Rules_0 = right_recursive_reduction;
+pub const reduction_RulesTail_0 = right_recursive_reduction;
 pub const reduction_Fields_0 = right_recursive_reduction;
 pub const reduction_ActionOutcome_0 = right_recursive_reduction;
 pub const reduction_ActionsToDispatch_0 = right_recursive_reduction;
@@ -177,7 +185,7 @@ pub const reduction_SideEffectsToDispatch_0 = right_recursive_reduction;
 pub const reduction_InstantiationParameters_0 = right_recursive_reduction;
 pub const reduction_Parameters_0 = right_recursive_reduction;
 
-fn drop_first_child(args: *ProcedureArguments) !void {
+pub fn drop_first_child(args: *ProcedureArguments) !void {
     // Let's keep "- "
     _ = args;
     // _ = try args.node.?.remove_children(args.allocator, 0, 2);
@@ -190,14 +198,14 @@ pub fn reduction_Rule(args: *ProcedureArguments) !void {
     if (args.verbosity > 0) {
         std.debug.print("{f}({d}) -> |", .{
             string_utilities.fmtString(
-                if (args.rule.header == -1)
+                if (args.rule.?.header == -1)
                     "-1"
                 else
-                    parser.parse_table.variables[args.rule.header],
+                    parser.parse_table.variables[args.rule.?.header],
             ),
-            args.rule.header,
+            args.rule.?.header,
         });
-        for (args.rule.right_hand_side) |idx| {
+        for (args.rule.?.right_hand_side) |idx| {
             std.debug.print("{f}({d})|", .{
                 string_utilities.fmtString(if (idx == -1)
                     "-1"
@@ -239,4 +247,13 @@ pub fn reduction_Start(args: *ProcedureArguments) !void {
     });
 
     try writer.flush();
+}
+
+pub fn drop_if_empty(args: *ProcedureArguments) !void {
+    if (args.node) |node| {
+        if (node.children.len == 0) {
+            // std.debug.print("drop from '{s}'\n", .{args.node.?.label});
+            args.node = null;
+        }
+    }
 }

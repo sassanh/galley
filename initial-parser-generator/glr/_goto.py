@@ -1,5 +1,7 @@
 from collections import defaultdict
 from functools import cached_property
+from pathlib import Path
+from typing import override
 
 from data_structures import EndSymbol, Symbol
 from glr._closure import GLRParserGeneratorClosureMixin
@@ -7,31 +9,33 @@ from glr._data_structures import Item, State, empty_state
 
 
 class GLRParserGeneratorGotoMixin(GLRParserGeneratorClosureMixin):
-    _goto_cache: dict[State, dict[Symbol, State]]
+    _goto_cache: dict[State, dict[int, State]]
 
     def __init__(self) -> None:
         self._goto_cache = defaultdict(dict)
         super().__init__()
 
-    # @override
-    # def log_to_file(self, directory: Path) -> None:
-    #     super().log_to_file(directory)
-    # with (directory / "states.log").open("w") as output:
-    #     for index, state in enumerate(self.canonical_states):
-    #         print(f"{index}.", state, file=output)
+    @override
+    def log_to_file(self, directory: Path) -> None:
+        super().log_to_file(directory)
+        with (directory / "states.log").open("w") as output:
+            for index, state in enumerate(self.canonical_states):
+                print(f"{index}.", state, file=output)
 
     @cached_property
     def canonical_states(self) -> list[State]:
         initial_state = self._closure(
             State(
-                items={
-                    Item(
-                        variable=self.start_variable,
-                        right_hand_side=self.rules[self.start_variable.id][0],
-                        head=0,
-                        look_ahead=EndSymbol(),
-                    )
-                }
+                items=frozenset(
+                    {
+                        Item(
+                            variable=self.start_variable,
+                            right_hand_side=self.rules[self.start_variable.id][0],
+                            head=0,
+                            look_ahead=EndSymbol(),
+                        )
+                    }
+                )
             )
         )
         collection: list[State] = [initial_state]
@@ -58,10 +62,10 @@ class GLRParserGeneratorGotoMixin(GLRParserGeneratorClosureMixin):
         return {state: index for index, state in enumerate(self.canonical_states)}
 
     def _goto(self, state: State, symbol: Symbol) -> State:
-        if symbol not in self._goto_cache[state]:
-            if symbol not in state.items_by_symbol:
+        if symbol.index not in self._goto_cache[state]:
+            if symbol.index not in state.items_by_symbol:
                 return empty_state
-            self._goto_cache[state][symbol] = self._closure(
-                state.items_by_symbol[symbol],
+            self._goto_cache[state][symbol.index] = self._closure(
+                state.items_by_symbol[symbol.index],
             )
-        return self._goto_cache[state][symbol]
+        return self._goto_cache[state][symbol.index]

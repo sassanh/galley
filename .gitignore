@@ -182,3 +182,4 @@ pyrightconfig.json
 *-backup
 _parse-table.zig
 /graphs
+.aider*

@@ -6,7 +6,7 @@ from typing import override
 
 from data_structures import (
     EndSymbol,
-    GrammarSymbol,
+    Symbol,
     TerminalSymbol,
 )
 from glr._data_structures import (
@@ -61,8 +61,8 @@ class GLRParserGeneratorParseTableMixin(GLRParserGeneratorGotoMixin):
                 )
 
     @cached_property
-    def parse_table(self) -> dict[State, dict[GrammarSymbol, set[Resolution]]]:
-        parse_table: dict[State, dict[GrammarSymbol, set[Resolution]]] = defaultdict(
+    def parse_table(self) -> dict[State, dict[Symbol, set[Resolution]]]:
+        parse_table: dict[State, dict[Symbol, set[Resolution]]] = defaultdict(
             lambda: defaultdict(set)
         )
 

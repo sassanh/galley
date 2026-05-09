@@ -187,15 +187,11 @@ pub const ProcedureArguments = struct {
     allocator: std.mem.Allocator,
     io: std.Io,
     verbosity: usize,
-    rule: Rule,
+    rule: ?Rule,
     node: ?*ASTNode,
 };
 
-pub const RuleProcedure = fn (args: *ProcedureArguments) anyerror!void;
-
-pub const VariableProcedure = fn (args: *ProcedureArguments) anyerror!void;
-
-pub const ReductionProcedure = fn (args: *ProcedureArguments) anyerror!void;
+pub const Procedure = fn (args: *ProcedureArguments) anyerror!void;
 
 pub fn wrap_procedure(comptime Signature: type, comptime procedure: anytype, comptime procedure_name: []const u8) Signature {
     const signature_type_info = @typeInfo(Signature);

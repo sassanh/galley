@@ -32,6 +32,7 @@ const ResolutionType = enum {{
 const Resolution = struct {{
     type: ResolutionType,
     data_index: u16,
+    symbol_index: u16,
 }};
 
 pub const action_table = blk: {{
@@ -45,7 +46,9 @@ pub const action_table = blk: {{
                         "\n            ".join(
                             [""]
                             + [
-                                f'.{{ "{symbol.printable}", Resolution{{ .type = .{
+                                f'.{{ "{
+                                    self.token_repr(terminal_item)
+                                }", Resolution{{ .type = .{
                                     resolution.type_string
                                 }, .data_index = {
                                     self.canonical_state_indices[resolution.state]
@@ -55,12 +58,22 @@ pub const action_table = blk: {{
                                     else 0
                                     if isinstance(resolution, AcceptResolution)
                                     else 1 / 0
-                                } }} }},'
-                                for symbol, resolution in sorted(
-                                    self.lr_parse_table[state].items(),
+                                }, .symbol_index = {symbol.index} }} }},'
+                                for terminal_item, symbol, resolution in sorted(
+                                    (
+                                        (
+                                            terminal_item,
+                                            symbol,
+                                            resolution,
+                                        )
+                                        for symbol, resolution in self.lr_parse_table[
+                                            state
+                                        ].items()
+                                        if isinstance(symbol, TerminalSymbol)
+                                        for terminal_item in symbol.terminals
+                                    ),
                                     key=lambda x: x[0],
                                 )
-                                if isinstance(symbol, TerminalSymbol)
                             ]
                         )
                     }
@@ -83,7 +96,7 @@ pub const goto_table = blk: {{
                         "\n".join(
                             [""]
                             + [
-                                f"            .{{ {self.variables.index(symbol)}, {
+                                f"            .{{ {symbol.variable_index}, {
                                     self.canonical_state_indices[resolution.state]
                                     if isinstance(resolution, GotoResolution)
                                     else 1 / 0
@@ -111,39 +124,4 @@ pub const goto_table = blk: {{
             )
         }
     }};
-}};
-
-pub const rule_procedures = rule_procedures: {{
-    var arr: [{
-            len(self.rules_list)
-        }]?*const data_structures.RuleProcedure = .{{null}} ** {len(self.rules_list)};
-
-    for (rules, 0..) |rule, index| {{
-        const procedure_name = "reduction_" ++ variables[rule.header] ++ "_" ++ rule.right_hand_side_index;
-        if (@hasDecl(parser.procedures, procedure_name)) {{
-            arr[index] = data_structures.wrap_procedure(data_structures.RuleProcedure, @field(parser.procedures, procedure_name), procedure_name);
-        }}
-    }}
-
-    break :rule_procedures arr;
-}};
-
-pub const variable_procedures = variable_procedures: {{
-    var arr: [{
-            len(self.variables)
-        }]?*const data_structures.VariableProcedure = .{{null}} ** {
-            len(self.variables)
-        };
-
-    for (variables, 0..) |variable, index| {{
-        const procedure_name = "reduction_" ++ variable;
-        if (@hasDecl(parser.procedures, procedure_name)) {{
-            arr[index] = data_structures.wrap_procedure(data_structures.VariableProcedure, @field(parser.procedures, procedure_name), variable);
-        }}
-    }}
-
-    break :variable_procedures arr;
-}};
-
-pub const reduction_procedure: ?*const data_structures.ReductionProcedure = if (@hasDecl(parser.procedures, "reduction")) data_structures.wrap_procedure(data_structures.ReductionProcedure, @field(parser.procedures, "reduction"), "reduction") else null;
-"""
+}};"""

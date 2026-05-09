@@ -61,8 +61,8 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
         var reader = program_file.reader(io, &buffer);
 
         var token = data_structures.Token{};
-        var columnOffsets = data_structures.Offsets{};
-        var lineOffsets = data_structures.Offsets{};
+        var column_offsets = data_structures.Offsets{};
+        var line_offsets = data_structures.Offsets{};
 
         try state_stack.append(gpa, 0);
 
@@ -111,25 +111,25 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
                             return error.InvalidIndentation;
                         }
                         const new_indent = line_spaces / indent_width;
-                        try lineOffsets.append(1);
+                        try line_offsets.append(1);
                         if (new_indent == current_indent) {
-                            try columnOffsets.append(@intCast(line_spaces + 1));
+                            try column_offsets.append(@intCast(line_spaces + 1));
                             try token.append('\n');
                         } else {
                             if (new_indent > current_indent) {
                                 for (0..new_indent - current_indent) |index| {
                                     if (index != 0) {
-                                        try lineOffsets.append(0);
+                                        try line_offsets.append(0);
                                     }
-                                    try columnOffsets.append(@intCast(new_indent * indent_width + 1));
+                                    try column_offsets.append(@intCast(new_indent * indent_width + 1));
                                     try token.append('\x01');
                                 }
                             } else if (new_indent < current_indent) {
                                 for (0..current_indent - new_indent) |index| {
                                     if (index != 0) {
-                                        try lineOffsets.append(0);
+                                        try line_offsets.append(0);
                                     }
-                                    try columnOffsets.append(@intCast(new_indent * indent_width + 1));
+                                    try column_offsets.append(@intCast(new_indent * indent_width + 1));
                                     try token.append('\x02');
                                 }
                             }
@@ -144,8 +144,8 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
                     continue;
                 }
 
-                try lineOffsets.append(0);
-                try columnOffsets.append(1);
+                try line_offsets.append(0);
+                try column_offsets.append(1);
                 try token.append(character);
 
                 while (true) {
@@ -200,17 +200,17 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
                             switch (resolution.type) {
                                 .shift => {
                                     var last_newline: i16 = -1;
-                                    line += lineOffsets.sum(0, longest_prefix.len);
+                                    line += line_offsets.sum(0, longest_prefix.len);
                                     for ("\n\x01\x02") |newline_char| {
                                         if (std.mem.lastIndexOfScalar(u8, token.items()[0..longest_prefix.len], newline_char)) |index| {
                                             if (index > last_newline) {
-                                                column = columnOffsets.sum(index, longest_prefix.len);
+                                                column = column_offsets.sum(index, longest_prefix.len);
                                                 last_newline = @intCast(index);
                                             }
                                         }
                                     }
                                     if (last_newline == -1) {
-                                        column += columnOffsets.sum(0, longest_prefix.len);
+                                        column += column_offsets.sum(0, longest_prefix.len);
                                     }
                                     try state_stack.append(gpa, resolution.data_index);
                                     const node = try arena_allocator.create(root.data_structures.ASTNode);
@@ -225,9 +225,30 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
                                         .right_hand_side_children = &[0]*root.data_structures.ASTNode{},
                                         .children = &[0]*root.data_structures.ASTNode{},
                                     };
+
+                                    if (parse_table.is_generative_terminal[@intCast(resolution.symbol_index)]) {
+                                        var args = data_structures.ProcedureArguments{
+                                            .allocator = arena_allocator,
+                                            .io = init.io,
+                                            .verbosity = verbosity,
+                                            .rule = null,
+                                            .node = node,
+                                        };
+
+                                        if (parse_table.symbol_procedures[resolution.symbol_index]) |procedure_pointer| {
+                                            const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
+                                            try procedure(&args);
+                                        }
+
+                                        if (parse_table.reduction_procedure) |procedure_pointer| {
+                                            const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
+                                            try procedure(&args);
+                                        }
+                                    }
+
                                     try semantic_stack.append(gpa, node);
-                                    try lineOffsets.pop(longest_prefix.len);
-                                    try columnOffsets.pop(longest_prefix.len);
+                                    try line_offsets.pop(longest_prefix.len);
+                                    try column_offsets.pop(longest_prefix.len);
                                     try token.pop(longest_prefix.len);
                                 },
                                 .reduce => {
@@ -238,9 +259,11 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
                                             parse_table.variables[rule.header],
                                             rule.header,
                                         });
-                                        for (rule.right_hand_side, 0..) |idx, i| {
+                                        for (rule.right_hand_side, 0..) |symbol_id, i| {
                                             if (i != 0) std.debug.print(", ", .{});
-                                            std.debug.print("{f}({d})", .{ root.string_utilities.fmtString(if (idx == -1) "-1" else parse_table.symbols[idx]), idx });
+                                            std.debug.print("{f}({d})", .{ root.string_utilities.fmtString(
+                                                if (symbol_id == -1) "-1" else parse_table.symbols[symbol_id],
+                                            ), symbol_id });
                                         }
                                         std.debug.print("\n\n", .{});
                                     }
@@ -287,7 +310,7 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
 
                                     {
                                         if (verbosity > 1) {
-                                            std.debug.print("\n Semantic reduction: {s} <~ ", .{
+                                            std.debug.print("\nSemantic reduction: {s} <~ ", .{
                                                 parse_table.variables[rule.header],
                                             });
                                         }
@@ -324,17 +347,17 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
                                     };
 
                                     if (parse_table.rule_procedures[resolution.data_index]) |procedure_pointer| {
-                                        const procedure = @as(*data_structures.RuleProcedure, @constCast(procedure_pointer));
+                                        const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
                                         try procedure(&args);
                                     }
 
-                                    if (parse_table.variable_procedures[rule.header]) |procedure_pointer| {
-                                        const procedure = @as(*data_structures.VariableProcedure, @constCast(procedure_pointer));
+                                    if (parse_table.symbol_procedures[parse_table.symbol_by_variable[rule.header]]) |procedure_pointer| {
+                                        const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
                                         try procedure(&args);
                                     }
 
                                     if (parse_table.reduction_procedure) |procedure_pointer| {
-                                        const procedure = @as(*data_structures.ReductionProcedure, @constCast(procedure_pointer));
+                                        const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
                                         try procedure(&args);
                                     }
 

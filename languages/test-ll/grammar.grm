@@ -1,0 +1,261 @@
+Start
+ |Rules
+
+Rules
+ |Rule RulesTail
+
+RulesTail
+ |OptionalNewLineMany Rule RulesTail
+ |
+
+Rule
+ |UppercaseId ":" ActionBody
+
+ActionBody
+ |block_start Fields block_end ActionBodyTail@drop_if_empty
+ |"\n---" WrappedLogicBody
+
+ActionBodyTail@test
+ @back|"---" WrappedLogicBody
+ |
+
+Fields
+ |FieldRow FieldsTail@drop_if_empty
+
+FieldsTail
+ |new_line FieldRow FieldsTail
+ |
+
+FieldRow
+ |"-" space LowercaseId ":" OptionalBlank Type OptionalFieldDefaultValue@drop_if_empty@replace_with_children
+
+OptionalFieldDefaultValue
+ |OptionalBlank "=" OptionalBlank Expression
+ |
+
+Type
+ |Id OptionalTypeArray
+
+OptionalTypeArray
+ |"[]"
+ |
+
+ActionOutcomeEntry
+ |StateOutcome
+ |ActionDispatchOutcome
+ |SideEffects
+
+StateOutcome
+ |">state:" space State
+
+State
+ |LowercaseId ":" UppercaseId InstantiationTail
+ |UppercaseId InstantiationTail
+ |"*" InstantiationTail
+
+ActionDispatchOutcome
+ |">actions:" block_start ActionsToDispatch block_end
+
+ActionsToDispatch
+ |new_line "-" space Expression ActionsToDispatch
+ |"-" space Expression
+
+SideEffects
+ |">effects:" block_start SideEffectsToDispatch block_end
+
+SideEffectsToDispatch
+ |new_line "-" space Expression SideEffectsToDispatch
+ |"-" space Expression
+
+WrappedLogicBody
+ |block_start LogicBody block_end
+
+LogicBody
+ |Expression LogicBodyTail@drop_if_empty
+
+LogicBodyTail
+ |new_line LogicBody
+ |
+
+Expression
+ |OperandAndNumber ExpressionTail@drop_if_empty
+ |ActionOutcomeEntry
+
+ExpressionTail
+ |OptionalBlank Operator OptionalBlank Expression
+ |
+
+OperandAndNumber
+ |WrappedLogicBody
+ |Number
+ |Operand OperandTail@drop_if_empty
+
+Operand
+ |LowercaseId OperandLowercaseIdTail@replace_with_children
+ |UppercaseId OperandUppercaseIdTail
+ |UnderscoreId
+ |String
+ |List
+
+OperandTail
+ |"[" ListGetTail
+ |
+
+ListGetTail
+ |Expression ListGetExpressionTail
+ |"..]"
+ |".." Expression "]"
+
+ListGetExpressionTail
+ |"]"
+ |"..]"
+ |".." Expression "]"
+
+OperandLowercaseIdTail
+ |"." Id
+ |"(" FunctionCallTail@replace_with_children
+ |"()"
+ |":" UppercaseId CompoundIdTail
+ |
+
+CompoundIdTail
+ |"." Id
+ |InstantiationTail
+ |
+
+OperandUppercaseIdTail
+ |InstantiationTail
+ |
+
+InstantiationParameters
+ |InstantiationParameter InstantiationParametersTail
+
+InstantiationParametersTail
+ |new_line InstantiationParameter InstantiationParametersTail
+ |
+
+InstantiationParameter
+ |Id OptionalBlank "=" OptionalBlank Expression
+
+InstantiationTail
+ |"(" block_start InstantiationParameters block_end ")"
+ |"()"
+
+Parameters
+ |Expression ParametersTail
+ |
+
+ParametersTail
+ |"," Expression ParametersTail
+ |
+
+FunctionCallTail
+ |Parameters ")"
+ |OptionalBlank ")"
+
+List
+ |"[" ListItems "]"
+
+ListItems
+ |Expression ListItemsTail
+ |"*" Expression
+ |
+
+ListItemsTail
+ |"," space NonEmptyListItems
+ |"<|" Id "|" space Expression
+ |
+
+NonEmptyListItems
+ |Expression NonEmptyListItemsTail
+ |"*" Expression
+
+NonEmptyListItemsTail
+ |"," space NonEmptyListItems
+ |
+
+String
+ |'" StringContent '"
+
+StringContent
+ |character StringContent
+ |
+
+LogicCondition
+ |Condition WrappedLogicBody ElsePart
+
+ElsePart
+ |"else" WrappedLogicBody
+ |
+
+Condition
+ |Id Operator Id
+
+Operator
+ |"+"
+ |"*"
+ |"/"
+ |"&"
+ |"|"
+ |">"
+ |">="
+ |"<"
+ |"<="
+ |"="
+ |"{" Expression "}"
+
+Blank
+ |space
+ |"	"
+
+OptionalBlank
+ |Blank OptionalBlank
+ |
+
+ForceBlank
+ |Blank OptionalBlank
+
+OptionalNewLineMany
+ |new_line OptionalNewLineMany
+ |
+
+Id
+ |LowercaseId
+ |UppercaseId
+ |UnderscoreId
+
+IdTail
+ |letter IdTail
+ |digit IdTail
+ |"_" IdTail
+ |
+
+UnderscoreId
+ |"_" IdTail
+
+LowercaseId
+ |lowercase_letter IdTail
+
+UppercaseId
+ |uppercase_letter IdTail
+
+Number
+ |IntegerNumber FloatTail
+
+IntegerNumber
+ |PositiveIntegerNumber
+ |NegativeIntegerNumber
+
+PositiveIntegerNumber
+ |digit PositiveIntegerNumberTail
+
+PositiveIntegerNumberTail
+ |digit PositiveIntegerNumberTail
+ |
+
+NegativeIntegerNumber
+ |"-" PositiveIntegerNumber
+
+FloatTail
+ |"." PositiveIntegerNumber
+ |

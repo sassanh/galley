@@ -1,9 +1,7 @@
 from collections import defaultdict
 from functools import cached_property
 
-from data_structures import (
-    GrammarSymbol,
-)
+from data_structures import Symbol
 from glr._data_structures import (
     AcceptResolution,
     Resolution,
@@ -14,9 +12,9 @@ from glr._parse_table import GLRParserGeneratorParseTableMixin
 
 class LRParserGeneratorParseTableMixin(GLRParserGeneratorParseTableMixin):
     @cached_property
-    def lr_parse_table(self) -> dict[State, dict[GrammarSymbol, Resolution]]:
+    def lr_parse_table(self) -> dict[State, dict[Symbol, Resolution]]:
         glr_parse_table = super().parse_table
-        parse_table: dict[State, dict[GrammarSymbol, Resolution]] = defaultdict(
+        parse_table: dict[State, dict[Symbol, Resolution]] = defaultdict(
             dict,
         )
 

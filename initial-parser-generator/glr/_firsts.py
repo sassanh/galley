@@ -3,7 +3,6 @@ from typing import Sequence, TypeGuard, overload, override
 
 from base._nullables import ParserGeneratorNullablesMixin
 from data_structures import (
-    LogicalSymbol,
     SpecialSymbol,
     Symbol,
     TerminalSymbol,
@@ -86,9 +85,6 @@ class GLRParserGeneratorFirstsMixin(ParserGeneratorNullablesMixin):
                 return symbol_firsts
             for right_hand_side in self.rules[variable.id]:
                 for rhs_symbol in right_hand_side.symbols:
-                    if isinstance(rhs_symbol, LogicalSymbol):
-                        continue
-
                     if (
                         isinstance(rhs_symbol, VariableSymbol)
                         and rhs_symbol != variable

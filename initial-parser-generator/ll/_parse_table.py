@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import override
 
 from data_structures import (
-    RightHandSide,
     Rule,
     Symbol,
     TerminalSymbol,
@@ -27,7 +26,7 @@ class LLParserGeneratorParseTableMixin(
                     json.dumps(
                         {
                             variable.id.decode("utf-8"): {
-                                i.decode(): repr(j) for i, j in row.items()
+                                repr(i): repr(j) for i, j in row.items()
                             }
                             for variable, row in self.parse_table.items()
                         },
@@ -37,21 +36,23 @@ class LLParserGeneratorParseTableMixin(
                 )
 
     @cached_property
-    def parse_table(self) -> dict[Symbol, dict[bytes, Rule]]:
-        parse_table: dict[Symbol, dict[bytes, Rule]] = defaultdict(dict)
+    def parse_table(self) -> dict[Symbol, dict[TerminalSymbol, Rule]]:
+        parse_table: dict[Symbol, dict[TerminalSymbol, Rule]] = defaultdict(dict)
         for symbol in self.symbols:
             if isinstance(symbol, VariableSymbol):
                 for terminal, rule in self._firsts(symbol).items():
                     parse_table[symbol][terminal] = rule
                 if symbol in self.nullables:
-                    for terminal in self._follows(symbol):
+                    for terminal, rule in self._follows(symbol).items():
                         if (
                             terminal in parse_table[symbol]
                             and parse_table[symbol][terminal] != self.nullables[symbol]
                         ):
                             raise SyntaxError(
                                 f"""Ambiguity in parse table for nullable variable "{symbol}":
-Token "{terminal.decode("utf-8")}" shows up both in its firsts as well as its follows."""
+Token "{terminal.id.decode("utf-8")}" shows up both in its firsts as well as its follows:
+{symbol},"{terminal.id.decode("utf-8")}": {symbol}->{parse_table[symbol][terminal][1]}
+{symbol},"{terminal.id.decode("utf-8")}": {rule[0].decode("utf-8")}->{rule[1]}"""
                             )
                         parse_table[symbol][terminal] = self.nullables[symbol]
 

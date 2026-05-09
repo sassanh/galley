@@ -1,4 +1,6 @@
-from data_structures import VariableSymbol
+from collections import defaultdict
+
+from data_structures import RightHandSide, TerminalSymbol, VariableSymbol
 from glr._data_structures import Item, State
 from glr._firsts import GLRParserGeneratorFirstsMixin
 
@@ -30,26 +32,42 @@ class GLRParserGeneratorClosureMixin(GLRParserGeneratorFirstsMixin):
     # )
 
     def _closure(self, state: State) -> State:
-        if state not in self._closure_cache:
-            to_check_items = state.items.copy()
-            closure = state.items.copy()
-            while to_check_items:
-                item = to_check_items.pop()
-                if not isinstance(item.head_symbol, VariableSymbol):
-                    continue
-                for right_hand_side in self.rules[item.head_symbol.id]:
-                    firsts = self._firsts([*item.remaining, item.look_ahead])
-                    new_items = {
-                        Item(
-                            variable=item.head_symbol,
-                            right_hand_side=right_hand_side,
+        if state in self._closure_cache:
+            return self._closure_cache[state]
+
+        closure: dict[RightHandSide, dict[bytes, dict[bytes, set[int]]]] = defaultdict(
+            lambda: defaultdict(lambda: defaultdict(set))
+        )
+        c = set(state.items)
+
+        for i in state.items:
+            closure[i.right_hand_side][i.variable.id][i.look_ahead.id].add(i.head)
+        to_check_items = list(state.items)
+
+        while to_check_items:
+            item = to_check_items.pop()
+
+            head_symbol = item.head_symbol
+            if not isinstance(head_symbol, VariableSymbol):
+                continue
+
+            rules = self.rules.get(head_symbol.id, [])
+            context = [*item.remaining, item.look_ahead]
+            firsts = self._firsts(context)
+
+            for rhs in rules:
+                for first in firsts:
+                    if 0 not in closure[rhs][head_symbol.id][first.id]:
+                        new_item = Item(
+                            variable=head_symbol,
+                            right_hand_side=rhs,
                             head=0,
                             look_ahead=first,
                         )
-                        for first in firsts
-                    }
-                    to_check_items |= new_items - closure
-                    closure |= new_items
+                        closure[rhs][head_symbol.id][first.id].add(0)
+                        c.add(new_item)
+                        to_check_items.append(new_item)
 
-            self._closure_cache[state] = State(items=closure)
-        return self._closure_cache[state]
+        new_state = State(items=frozenset(c))
+        self._closure_cache[state] = new_state
+        return new_state

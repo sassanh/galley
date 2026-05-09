@@ -41,7 +41,7 @@ class ParserGeneratorBaseMixin(abc.ABC):
             setattr(self, arg, value)
 
     def from_bytes(self, grammar_text: bytes):
-        header = b""
+        header_symbol: VariableSymbol | None = None
         grammar_start_variable: VariableSymbol | None = None
 
         for line_number, line_ in enumerate(grammar_text.split(b"\n")):
@@ -52,16 +52,17 @@ class ParserGeneratorBaseMixin(abc.ABC):
 
             line = line.replace(b"\r", b"\n")
 
-            if header != b"" and line.startswith(b" |"):
+            if header_symbol is not None and line.startswith(b" "):
                 try:
+                    rule_procedures, _, line = line[1:].partition(b"|")
                     literals = []
                     items = (
                         re.sub(
                             b"'([^]*)",
                             lambda a: literals.append(a.group(1)) or b"\x00",
-                            line[2:],
+                            line,
                         ).split(b" ")
-                        if line[2:]
+                        if line
                         else []
                     )
                     items = [
@@ -72,49 +73,53 @@ class ParserGeneratorBaseMixin(abc.ABC):
                         item.decode("unicode-escape").encode("raw-unicode-escape")
                         for item in items
                     ]
-                    print(header, "->", items)
+
                     right_hand_side = RightHandSide(
-                        symbols=[Symbol.from_str(i) for i in items]
+                        symbols=[Symbol.from_str(i) for i in items],
+                        procedures=list(reversed(rule_procedures[1:].split(b"@"))),
                     )
                 except ValueError as exception:
                     raise ValueError(
                         f"While parsing line {line_number + 1}\n{line.decode('utf-8')}\n{exception}"
                     )
-                for variable in right_hand_side.symbols:
-                    if variable not in self.symbols:
-                        self.symbols.append(variable)
-                self.rules[header].append(right_hand_side)
+                for symbol in right_hand_side.symbols:
+                    if symbol not in self.symbols:
+                        self.symbols.append(symbol)
+                self.rules[header_symbol.id].append(right_hand_side)
             else:
-                header = line
-                header_symbol = VariableSymbol(id=header)
+                symbol = Symbol.from_str(line)
+                if not isinstance(symbol, VariableSymbol):
+                    raise ValueError("Rule headers can only be variables")
+                header_symbol = symbol
                 if header_symbol not in self.symbols:
                     self.symbols.append(header_symbol)
                 grammar_start_variable = grammar_start_variable or header_symbol
 
-        self.symbols.append(VariableSymbol(id=b"Start_"))
+        self.start_variable = VariableSymbol(id=b"AugmentedStart")
+        self.symbols.append(self.start_variable)
         self.symbols.append(EndSymbol())
 
         if grammar_start_variable is None:
             raise SyntaxError("A grammar should have at least one rule!")
 
-        self.start_variable = VariableSymbol(id=b"Start_")
-
         self.rules[self.start_variable.id] = [
             RightHandSide(symbols=[grammar_start_variable, EndSymbol()])
         ]
-        self.rules[EndSymbol().id] = []
 
-        self.check_grammar()
+        # self.check_grammar()
 
     def check_grammar(self) -> None:
         for variable in self.variables:
             if variable.id not in self.rules:
                 raise SyntaxError(f'There is no rule for variable "{variable}"!')
+        del self.variables
 
     def log_to_file(self, directory: Path) -> None:
         with (directory / "symbols.log").open("w") as output:
-            for index, symbol in enumerate(self.symbols):
-                print(f"{index}.", repr(symbol), symbol.type_string, file=output)
+            for symbol in self.symbols:
+                print(
+                    f"{symbol.index}.", repr(symbol), type(symbol).__name__, file=output
+                )
 
         with (directory / "rules.log").open("w") as output:
             for index, rule in enumerate(self.rules_list):
@@ -123,7 +128,7 @@ class ParserGeneratorBaseMixin(abc.ABC):
     @cached_property
     def variables(self) -> list[VariableSymbol]:
         return sorted(
-            symbol for symbol in self.symbols if isinstance(symbol, VariableSymbol)
+            [symbol for symbol in self.symbols if isinstance(symbol, VariableSymbol)],
         )
 
     @cached_property

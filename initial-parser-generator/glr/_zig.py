@@ -1,5 +1,6 @@
 from functools import cached_property
 
+from base._zig import ParserGeneratorZigMixin
 from data_structures import (
     TerminalSymbol,
     VariableSymbol,
@@ -13,47 +14,14 @@ from glr._data_structures import (
 from glr._parse_table import GLRParserGeneratorParseTableMixin
 
 
-class GLRParserGeneratorZigMixin(GLRParserGeneratorParseTableMixin):
+class GLRParserGeneratorZigMixin(
+    GLRParserGeneratorParseTableMixin,
+    ParserGeneratorZigMixin,
+):
     @cached_property
     def zig_parse_table(self) -> str:
         return f"""\
-const std = @import("std");
-const data_structures = @import("root").data_structures;
-
-pub const parseTableType = "glr";
-
-pub const Rule = struct {{
-    header: u16,
-    right_hand_side: []const u16,
-}};
-
-pub const symbols = &[_][]const u8{{
-{"\n".join([f'    "{symbol.printable}",' for symbol in self.symbols])}
-}};
-
-pub const rules = &[_]Rule{{
-{
-            "\n".join(
-                [
-                    f'''\
-    Rule{{ .header = {
-                        self.symbols.index(VariableSymbol(id=header))
-                    }, .right_hand_side = \
-&[_]u16{{{
-                        (" " if len(right_hand_side.symbols) > 1 else "")
-                        + ", ".join(
-                            [
-                                f"{self.symbols.index(symbol)}"
-                                for symbol in right_hand_side.symbols
-                            ]
-                        )
-                        + (" " if len(right_hand_side.symbols) > 1 else "")
-                    }}} }},'''
-                    for header, right_hand_side in self.rules_list
-                ]
-            )
-        }
-}};
+{self.zig_base}
 
 const ResolutionType = enum {{
     shift,
@@ -64,19 +32,23 @@ const ResolutionType = enum {{
 const Resolution = struct {{
     type: ResolutionType,
     data_index: u16,
+    symbol_index: u16,
 }};
 
 pub const action_table = blk: {{
     @setEvalBranchQuota(10_000_000);
-    break :blk &[_]std.StaticStringMap([]const Resolution){{
+    break :blk &[_]data_structures.StaticStringMap(Resolution){{
 {
             "\n".join(
                 [
-                    f'''        std.StaticStringMap([]const Resolution).initComptime(.{{{
+                    f'''        data_structures.StaticStringMap(Resolution).initComptime(\
+&[_]data_structures.StaticStringMap(Resolution).Entry{{{
                         "\n            ".join(
                             [""]
                             + [
-                                f'.{{ "{symbol.printable}", &[_]Resolution{{ {
+                                f'.{{ "{
+                                    self.token_repr(terminal_item)
+                                }", &[_]Resolution{{ {
                                     ", ".join(
                                         f"Resolution{{.type = .{
                                             resolution.type_string
@@ -90,14 +62,25 @@ pub const action_table = blk: {{
                                             else 0
                                             if isinstance(resolution, AcceptResolution)
                                             else print(resolution) or 1 / 0
-                                        }}}"
+                                        }, .symbol_index = {symbol.index} }}"
                                         for resolution in resolutions
                                     )
                                 } }} }},'
-                                for symbol, resolutions in self.parse_table[
-                                    state
-                                ].items()
-                                if isinstance(symbol, TerminalSymbol)
+                                for terminal_item, symbol, resolutions in sorted(
+                                    (
+                                        (
+                                            terminal_item,
+                                            symbol,
+                                            resolution,
+                                        )
+                                        for symbol, resolution in self.parse_table[
+                                            state
+                                        ].items()
+                                        if isinstance(symbol, TerminalSymbol)
+                                        for terminal_item in symbol.terminals
+                                    ),
+                                    key=lambda x: x[0],
+                                )
                             ]
                         )
                     }
@@ -119,7 +102,7 @@ pub const goto_table = blk: {{
                         "\n            ".join(
                             [""]
                             + [
-                                f".{{ {self.symbols.index(symbol)}, &[_]u16{{ {
+                                f".{{ {symbol.index}, &[_]u16{{ {
                                     ', '.join(
                                         str(
                                             self.canonical_state_indices[

@@ -19,7 +19,7 @@ class GLRParserGeneratorZigMixin(
     ParserGeneratorZigMixin,
 ):
     @cached_property
-    def zig_parse_table(self) -> str:
+    def zig_parser(self) -> str:
         return f"""\
 {self.zig_base}
 

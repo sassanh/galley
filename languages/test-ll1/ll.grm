@@ -13,10 +13,10 @@ Rule
 
 ActionBody
  |block_start Fields block_end ActionBodyTail@drop_if_empty
- |"\n---" WrappedLogicBody
+ |"[" WrappedLogicBody
 
 ActionBodyTail@test
- @back|"---" WrappedLogicBody
+ @back|"-" WrappedLogicBody
  |
 
 Fields
@@ -37,7 +37,7 @@ Type
  |Id OptionalTypeArray
 
 OptionalTypeArray
- |"[]"
+ |";"
  |
 
 ActionOutcomeEntry
@@ -46,22 +46,22 @@ ActionOutcomeEntry
  |SideEffects
 
 StateOutcome
- |">state:" space State
+ |"\\" space State
 
 State
  |LowercaseId ":" UppercaseId InstantiationTail
  |UppercaseId InstantiationTail
- |"*" InstantiationTail
+ |"!" InstantiationTail
 
 ActionDispatchOutcome
- |">actions:" block_start ActionsToDispatch block_end
+ |"{" block_start ActionsToDispatch block_end
 
 ActionsToDispatch
  |new_line "-" space Expression ActionsToDispatch
  |"-" space Expression
 
 SideEffects
- |">effects:" block_start SideEffectsToDispatch block_end
+ |"}" block_start SideEffectsToDispatch block_end
 
 SideEffectsToDispatch
  |new_line "-" space Expression SideEffectsToDispatch
@@ -103,18 +103,18 @@ OperandTail
 
 ListGetTail
  |Expression ListGetExpressionTail
- |"..]"
- |".." Expression "]"
+ |"]"
+ |":" Expression "]"
 
 ListGetExpressionTail
  |"]"
- |"..]"
- |".." Expression "]"
+ |"?"
+ |"^" Expression "]"
 
 OperandLowercaseIdTail
  |"." Id
  |"(" Parameters ")"
- |"()"
+ |"%"
  |":" UppercaseId CompoundIdTail
  |
 
@@ -135,11 +135,11 @@ InstantiationParametersTail
  |
 
 InstantiationParameter
- |Id OptionalBlank "=" OptionalBlank Expression
+ |Id OptionalBlank "`" OptionalBlank Expression
 
 InstantiationTail
  |"(" block_start InstantiationParameters block_end ")"
- |"()"
+ |"$"
 
 Parameters
  |OptionalBlank Expression ParametersTail
@@ -159,7 +159,7 @@ ListItems
 
 ListItemsTail
  |"," space NonEmptyListItems
- |"<|" Id "|" space Expression
+ |"@" Id "," space Expression
  |
 
 NonEmptyListItems
@@ -181,7 +181,7 @@ LogicCondition
  |Condition WrappedLogicBody ElsePart
 
 ElsePart
- |"else" WrappedLogicBody
+ |"e" WrappedLogicBody
  |
 
 Condition

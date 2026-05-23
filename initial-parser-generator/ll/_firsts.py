@@ -72,6 +72,12 @@ class LLParserGeneratorFirstsMixin(ParserGeneratorNullablesMixin):
                         }
 
                     elif isinstance(rhs_symbol, TerminalSymbol):
+                        if rhs_symbol in symbol_firsts:
+                            raise SyntaxError(
+                                f"""Ambiguity in firsts for variable "{variable}":
+{variable},"{repr(rhs_symbol)}": {variable}->{symbol_firsts[rhs_symbol][1]}
+{variable},"{repr(rhs_symbol)}": {rhs_symbol}->{right_hand_side}"""
+                            )
                         symbol_firsts[rhs_symbol] = (variable.id, right_hand_side)
 
                     if rhs_symbol not in self.nullables:

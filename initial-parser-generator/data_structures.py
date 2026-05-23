@@ -86,8 +86,30 @@ class Symbol:
                         + string.punctuation
                         + string.whitespace
                     )
+                case b'character^"""':
+                    terminals = [
+                        i
+                        for i in (
+                            string.ascii_letters
+                            + string.digits
+                            + string.punctuation
+                            + string.whitespace
+                        )
+                        if i != '"'
+                    ]
                 case b"operator":
-                    terminals = ["+", "*", "/", "&", "|", ">", ">=", "<", "<=", "="]
+                    terminals = [
+                        "+",
+                        "*",
+                        "/",
+                        "&",
+                        "|",
+                        ">",
+                        ">=",
+                        "<",
+                        "<=",
+                        "=",
+                    ]
                 case b"new_line":
                     terminals = "\n"
                 case b"space":
@@ -101,10 +123,7 @@ class Symbol:
 
             return GenerativeTerminalSymbol(
                 id=id,
-                terminals=[
-                    i.encode("raw-unicode-escape").replace(b'"', b'\\"')
-                    for i in terminals
-                ],
+                terminals=[i.encode("raw-unicode-escape") for i in terminals],
             )
 
         return VariableSymbol(id=id)
@@ -157,7 +176,7 @@ class TerminalSymbol(Symbol):
         self.terminals = self.terminals or [self.id]
 
     def __repr__(self) -> str:
-        return f"'{super().__repr__()}'"
+        return f"terminal_{super().__repr__()}"
 
     def fix_id(self) -> None:
         self.id = self.id[1:-1]
@@ -166,7 +185,7 @@ class TerminalSymbol(Symbol):
 @dataclasses.dataclass(slots=True, unsafe_hash=False, eq=False)
 class GenerativeTerminalSymbol(TerminalSymbol):
     def __repr__(self) -> str:
-        return f"*{super().__repr__()}"
+        return f"generative_{super().__repr__()}"
 
     def __post_init__(self):
         super().__post_init__()
@@ -182,7 +201,7 @@ class GenerativeTerminalSymbol(TerminalSymbol):
 @dataclasses.dataclass(slots=True, unsafe_hash=False, eq=False)
 class SpecialSymbol(TerminalSymbol):
     def __repr__(self) -> str:
-        return "*"
+        return "special_"
 
 
 @dataclasses.dataclass(slots=True, unsafe_hash=False, eq=False)
@@ -203,7 +222,7 @@ class EndSymbol(SpecialSymbol):
 
 @dataclasses.dataclass(slots=True)
 class RightHandSide:
-    symbols: list[Symbol]
+    symbols: tuple[Symbol, ...]
     procedures: list[bytes] = dataclasses.field(default_factory=list)
     _hash: int = dataclasses.field(init=False)
 
@@ -211,7 +230,7 @@ class RightHandSide:
         self._hash = hash(tuple(self.symbols))
 
     def __repr__(self) -> str:
-        return "|".join(str(symbol) for symbol in [""] + self.symbols + [""])
+        return "|".join(str(symbol) for symbol in ("",) + self.symbols + ("",))
 
     def __hash__(self) -> int:
         return self._hash

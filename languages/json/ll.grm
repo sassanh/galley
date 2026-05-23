@@ -1,0 +1,74 @@
+Value
+ |Object OptionalBlank
+ |Array OptionalBlank
+ |Number OptionalBlank
+ |String OptionalBlank
+ |"null" OptionalBlank
+ |"true" OptionalBlank
+ |"false" OptionalBlank
+
+Value
+ |"(" Value ")"
+
+Object
+ |"{" OptionalBlank ObjectMembers
+
+ObjectMembers
+ |ObjectMember ObjectMembersTail "}"
+ |"}"
+
+ObjectMembersTail
+ |"," OptionalBlank ObjectMember ObjectMembersTail
+ |
+
+ObjectMember
+ |String OptionalBlank ":" OptionalBlank Value
+
+Array
+ |"[" OptionalBlank ArrayMembers
+
+ArrayMembers
+ |Value ArrayMembersTail "]"
+ |"]"
+
+ArrayMembersTail
+ |"," OptionalBlank Value ArrayMembersTail
+ |
+
+Blank
+ |space
+ |new_line
+ |block_start
+ |block_end
+
+OptionalBlank
+ |Blank OptionalBlank
+ |
+
+String
+ |'" StringContent '"
+
+StringContent
+ |character^'" StringContent
+ |
+
+Number
+ |IntegerNumber FloatTail
+
+IntegerNumber
+ |PositiveIntegerNumber
+ |NegativeIntegerNumber
+
+PositiveIntegerNumber
+ |digit PositiveIntegerNumberTail
+
+PositiveIntegerNumberTail
+ |digit PositiveIntegerNumberTail
+ |
+
+NegativeIntegerNumber
+ |"-" PositiveIntegerNumber
+
+FloatTail
+ |"." PositiveIntegerNumber
+ |

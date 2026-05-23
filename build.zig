@@ -101,7 +101,7 @@ pub fn build(b: *std.Build) !void {
                     }),
                 });
 
-                b.installArtifact(exe);
+                const install_artifact = b.addInstallArtifact(exe, .{});
 
                 const result = try std.mem.concat(
                     b.allocator,
@@ -113,6 +113,7 @@ pub fn build(b: *std.Build) !void {
                 const run_step = b.step(entry.path, result);
 
                 const run_cmd = b.addRunArtifact(exe);
+                run_step.dependOn(&install_artifact.step);
                 run_step.dependOn(&run_cmd.step);
 
                 run_cmd.step.dependOn(b.getInstallStep());

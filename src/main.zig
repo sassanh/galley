@@ -10,18 +10,7 @@ fn printHelp() void {
 }
 
 pub fn main(init: std.process.Init) !void {
-    var it = init.minimal.args.iterate();
-    _ = it.next();
-
-    const program_file = if (it.next()) |path|
-        try std.Io.Dir.cwd().openFile(init.io, path, .{
-            .mode = .read_only,
-            .lock = .exclusive,
-        })
-    else
-        std.Io.File.stdin();
-
-    try parser.parse(init, program_file);
+    try parser.parse(init);
 }
 
 test "simple test" {

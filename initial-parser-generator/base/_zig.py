@@ -1,4 +1,5 @@
 from functools import cached_property
+from typing import Literal
 
 from base import ParserGeneratorBaseMixin
 from data_structures import (
@@ -9,19 +10,24 @@ from data_structures import (
 
 
 class ParserGeneratorZigMixin(ParserGeneratorBaseMixin):
-    def token_repr(self, token: bytes) -> str:
-        return (
-            token.decode("raw-unicode-escape")
-            .encode("unicode-escape")
-            .decode("utf-8")
-            .replace('"', '\\"')
+    def token_repr(
+        self, token: bytes, *, quote: Literal['"', "'"] = '"', in_format_string=False
+    ) -> str:
+        result = (
+            token.decode("raw-unicode-escape").encode("unicode-escape").decode("utf-8")
         )
+        if in_format_string:
+            result = result.replace("{", "{{").replace("}", "}}").replace("\\", "\\\\")
+
+        return result.replace(quote, f"\\{quote}")
 
     @cached_property
     def zig_base(self):
         return f"""\
+const builtin = @import("builtin");
 const std = @import("std");
 const data_structures = @import("root").data_structures;
+const string_utilities = @import("root").string_utilities;
 const parser = @import("parser");
 
 pub const parse_table_type = "{self.parser_type}";
@@ -121,13 +127,15 @@ const variable_procedure_names = &[_][]const []const u8{{
     {
             "\n    ".join(
                 [
-                    f"&[_][] const u8{{{
-                        ', '.join(
+                    f"&[_][]const u8{{{
+                        (' ' if len(variable.procedures) > 1 else '')
+                        + ', '.join(
                             [
                                 f'"{procedure.decode("utf-8")}"'
                                 for procedure in variable.procedures
                             ]
                         )
+                        + (' ' if len(variable.procedures) > 1 else '')
                     }}},"
                     for variable in self.variables
                 ]

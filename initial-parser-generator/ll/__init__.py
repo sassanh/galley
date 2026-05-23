@@ -1,12 +1,18 @@
-from data_structures import RightHandSide, VariableSymbol
+from data_structures import VariableSymbol
 from ll._zig import LLParserGeneratorZigMixin
 
 
 class LLParserGenerator(LLParserGeneratorZigMixin):
     parser_type = "ll"
 
-    def from_bytes(self, grammar_text: bytes):
-        super().from_bytes(grammar_text)
-        self.generative_terminal_id = b"GenerativeTerminal"
-        self.rules[self.generative_terminal_id].append(RightHandSide([]))
-        self.symbols.append(VariableSymbol(id=self.generative_terminal_id))
+    def check_grammar(self) -> None:
+        for variable, right_hand_sides in self.rules.items():
+            for right_hand_side in right_hand_sides:
+                if (
+                    right_hand_side.symbols
+                    and right_hand_side.symbols[0].id == variable
+                ):
+                    raise SyntaxError(
+                        f'Rule "{repr(VariableSymbol(id=variable))} -> {right_hand_side}" has left-recursion.'
+                    )
+        super().check_grammar()

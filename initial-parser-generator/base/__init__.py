@@ -40,6 +40,9 @@ class ParserGeneratorBaseMixin(abc.ABC):
         for arg, value in args._get_kwargs():
             setattr(self, arg, value)
 
+    def patch_grammar(self) -> None:
+        pass
+
     def from_bytes(self, grammar_text: bytes):
         header_symbol: VariableSymbol | None = None
         grammar_start_variable: VariableSymbol | None = None
@@ -66,7 +69,7 @@ class ParserGeneratorBaseMixin(abc.ABC):
                         else []
                     )
                     items = [
-                        b'"' + literals.pop(0) + b'"' if item == b"\x00" else item
+                        re.sub(b"\x00", lambda _: b'"' + literals.pop(0) + b'"', item)
                         for item in items
                     ]
                     items = [
@@ -75,7 +78,7 @@ class ParserGeneratorBaseMixin(abc.ABC):
                     ]
 
                     right_hand_side = RightHandSide(
-                        symbols=[Symbol.from_str(i) for i in items],
+                        symbols=tuple(Symbol.from_str(i) for i in items),
                         procedures=list(reversed(rule_procedures[1:].split(b"@"))),
                     )
                 except ValueError as exception:
@@ -103,10 +106,11 @@ class ParserGeneratorBaseMixin(abc.ABC):
             raise SyntaxError("A grammar should have at least one rule!")
 
         self.rules[self.start_variable.id] = [
-            RightHandSide(symbols=[grammar_start_variable, EndSymbol()])
+            RightHandSide(symbols=(grammar_start_variable, EndSymbol()))
         ]
 
-        # self.check_grammar()
+        self.patch_grammar()
+        self.check_grammar()
 
     def check_grammar(self) -> None:
         for variable in self.variables:

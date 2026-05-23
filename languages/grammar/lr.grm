@@ -2,29 +2,30 @@ Start
  |Rules
 
 Rules
- |Rules "\n" Rule
+ |Rules new_line Rule
  |Rule
 
 Rule
- |VariableSymbol BlockStart RightHandSides BlockEnd
+ |VariableSymbol ProcedureTail block_start RightHandSides block_end
 
 RightHandSides
- |RightHandSides "\n" RightHandSide
+ |RightHandSides new_line RightHandSide
  |RightHandSide
 
 RightHandSide
- |"|" NonEmptyRightHandSide
- |"|"
+ |ProcedureTail "|" NonEmptyRightHandSide
+ |ProcedureTail "|"
  |"#" AnyContent
  # Some comment
 
 NonEmptyRightHandSide
- |NonEmptyRightHandSide Space Symbol
- |Symbol
+ |NonEmptyRightHandSide space Symbol ProcedureTail
+ |Symbol ProcedureTail
 
 Symbol
  |VariableSymbol
  |TerminalSymbol
+ |GenerativeTerminalSymbol
 
 VariableSymbol
  |UppercaseId
@@ -33,45 +34,50 @@ TerminalSymbol
  |"'" StringContent "\x03"
  |'" SimpleStringContent '"
 
+GenerativeTerminalSymbol
+ |LowercaseId
+ |LowercaseId GenerativeTerminalExceptions
+
+GenerativeTerminalExceptions
+ |GenerativeTerminalExceptions "^" TerminalSymbol
+ |"^" TerminalSymbol
+
+ProcedureTail
+ |ProcedureTail "@" LowercaseId
+ |
+
 StringContent
- |StringContent Character
- |StringContent '"
- |StringContent Space
- |Character
- |'"
- |Space
+ |StringContent character
+ |character
 
 SimpleStringContent
- |SimpleStringContent Character
- |Character
+ |SimpleStringContent character^'"
+ |character^'"
 
 ControlCharacter
  |"\x01"
  #|"\x02"
  |"\x03"
+ |"\x04"
 
 AnyContent
- |AnyContent Character
+ |AnyContent character
  |AnyContent ControlCharacter
- |AnyContent '"
- |AnyContent Space
- |Character
+ |character
  |ControlCharacter
- |'"
- |Space
 
 Id
  |LowercaseId
  |UppercaseId
 
 LowercaseId
- |LowercaseLetter
- |LowercaseId Letter
- |LowercaseId Digit
+ |lowercase_letter
+ |LowercaseId letter
+ |LowercaseId digit
  |LowercaseId "_"
 
 UppercaseId
- |UppercaseLetter
- |UppercaseId Letter
- |UppercaseId Digit
+ |uppercase_letter
+ |UppercaseId letter
+ |UppercaseId digit
  |UppercaseId "_"

@@ -1,0 +1,90 @@
+Start
+ |Rules
+
+Rules
+ |Rule RulesTail
+
+RulesTail
+ |new_line Rule RulesTail
+ |
+
+Rule
+ |VariableSymbol ProcedureTail block_start RightHandSides block_end
+
+RightHandSides
+ |RightHandSideLine RightHandSidesTail
+
+RightHandSidesTail
+ |new_line RightHandSideLine RightHandSidesTail
+ |
+
+RightHandSideLine
+ |ProcedureTail "|" RightHandSide
+ |"#" AnyContent
+ # Some comment
+
+RightHandSide
+ |Symbol ProcedureTail RightHandSideTail
+ |
+
+RightHandSideTail
+ |space Symbol ProcedureTail RightHandSideTail
+ |
+
+Symbol
+ |VariableSymbol
+ |TerminalSymbol
+ |GenerativeTerminalSymbol
+
+VariableSymbol
+ |UppercaseId
+
+TerminalSymbol
+ |"'" StringContent "\x03"
+ |'" SimpleStringContent '"
+
+GenerativeTerminalSymbol
+ |LowercaseId GenerativeTerminalExceptions
+
+GenerativeTerminalExceptions
+ |"^" TerminalSymbol GenerativeTerminalExceptions
+ |
+
+ProcedureTail
+ |"@" LowercaseId ProcedureTail
+ |
+
+StringContent
+ |character StringContent
+ |
+
+SimpleStringContent
+ |character^'" SimpleStringContent
+ |
+
+ControlCharacter
+ |"\x01"
+ #|"\x02"
+ |"\x03"
+ |"\x04"
+
+AnyContent
+ |character AnyContentTail
+ |ControlCharacter AnyContentTail
+
+AnyContentTail
+ |character AnyContentTail
+ |ControlCharacter AnyContentTail
+ |
+
+IdTail
+ |letter IdTail
+ |digit IdTail
+ |"_" IdTail
+ |
+
+LowercaseId
+ |lowercase_letter IdTail
+
+UppercaseId
+ |uppercase_letter IdTail

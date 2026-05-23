@@ -1,0 +1,6573 @@
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ TodoList(
+    items`[]
+  )
+  \ TodoList(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )
+
+Add:
+  - item: TodoItem
+-
+    \ !(
+      items`[]
+    )
+  {len(state.items) < 10}
+    \ !(
+      items`[]
+    )
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"Overflow"
+        message`"Items overflow, oldest item was removed"
+      )
+
+Remove:
+  - item: TodoItem
+-
+      \ !(
+        items`[]
+      )
+    {1 > 2}
+      \ !(
+        z`1
+      )
+  {item_ + item |item_| state.items}
+    {
+      - notification:Notification(
+        severity`notification:Severity.Important
+        title`"No such item"
+        message`"Todo item to be removed does not exist!"
+      )
+
+TodoItem:
+  - title: str
+  - timestamp: int = timestamp()
+
+TodoList:
+  - items: TodoItem
+
+Initialize:
+  - items: TodoItem
+-
+  \ Tod(
+    items`[]
+  )
+  {
+    - Add(
+      item`TodoItem(
+        title`"test"
+      )
+    )

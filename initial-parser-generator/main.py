@@ -156,7 +156,7 @@ def main():
 
     with parse_table_path.open("w") as parse_table_file:
         print(
-            parser_generator.zig_parse_table,
+            parser_generator.zig_parser,
             file=parse_table_file,
         )
 

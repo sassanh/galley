@@ -1,24 +1,24 @@
-const builtin = @import("builtin");
 const clap = @import("clap");
 const root = @import("root");
 const std = @import("std");
 
 pub const procedures = @import("procedures");
 pub const parse_table = @import("parse-table");
+pub const read_chunk_size = 128 * 1024;
 
 const data_structures = root.data_structures;
 
-pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
+pub fn parse(init: std.process.Init) !void {
     const params = comptime clap.parseParamsComptime(
         \\-h, --help                          Display this help and exit.
         \\-v, --verbosity <VERBOSITY_LEVEL>   An option parameter, which takes a value.
-        \\-r, --repeats <REPEAT_TIMES>        Repeat the parse process. Useful for benchmarking.
-        \\<FILE>...
+        \\-r, --iterations <ITERATIONS>       Repeat the parse process. Useful for benchmarking.
+        \\<FILE>?
         \\
     );
     const parsers = comptime .{
         .VERBOSITY_LEVEL = clap.parsers.int(usize, 10),
-        .REPEAT_TIMES = clap.parsers.int(usize, 10),
+        .ITERATIONS = clap.parsers.int(usize, 10),
         .FILE = clap.parsers.string,
     };
     var diag = clap.Diagnostic{};
@@ -44,46 +44,60 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
     }
 
     const verbosity = if (res.args.verbosity) |verbosity| verbosity else 0;
-    const repeats = if (res.args.repeats) |repeats| repeats else 1;
+    const iterations = if (res.args.iterations) |iterations| iterations else 1;
 
     const gpa = init.gpa;
     const arena_allocator = init.arena.allocator();
     const io = init.io;
 
-    for (0..repeats) |_| benchmark_loop: {
-        var state_stack = try std.ArrayList(u16).initCapacity(gpa, 64);
-        defer state_stack.deinit(gpa);
+    const program_file = if (res.positionals[0]) |path|
+        try std.Io.Dir.cwd().openFile(init.io, path, .{
+            .mode = .read_only,
+            .lock = .exclusive,
+        })
+    else
+        std.Io.File.stdin();
 
-        var semantic_stack = try std.ArrayList(?*root.data_structures.ASTNode).initCapacity(gpa, 64);
-        defer semantic_stack.deinit(gpa);
+    var parsed_bytes: usize = 0;
 
-        var buffer: [16 * 1024]u8 = undefined;
-        var reader = program_file.reader(io, &buffer);
+    const start = std.Io.Clock.awake.now(init.io);
 
-        var token = data_structures.Token{};
-        var column_offsets = data_structures.Offsets{};
-        var line_offsets = data_structures.Offsets{};
+    var state_stack = try std.ArrayList(u16).initCapacity(gpa, 64);
+    defer state_stack.deinit(gpa);
 
+    var semantic_stack = try std.ArrayList(?*root.data_structures.ASTNode).initCapacity(gpa, 64);
+    defer semantic_stack.deinit(gpa);
+
+    var file_buffer: [16 * 1024]u8 = undefined;
+    var reader = program_file.reader(io, &file_buffer);
+
+    var token = data_structures.Token{};
+    var column_offsets = data_structures.Offsets{};
+    var line_offsets = data_structures.Offsets{};
+
+    for (0..iterations) |_| benchmark_loop: {
+        try reader.seekTo(0);
         try state_stack.append(gpa, 0);
 
-        var line: u16 = 1;
-        var column: u16 = 1;
-        var indent_width: u16 = 0;
-        var current_indent: u16 = 0;
-        var line_spaces: u16 = 0;
+        var line: usize = 1;
+        var column: usize = 1;
+        var indent_width: usize = 0;
+        var current_indent: usize = 0;
+        var line_spaces: usize = 0;
         var is_start_of_line: bool = false;
 
         while (true) {
-            var bytes_read = reader.interface.readSliceShort(&buffer) catch |err| switch (err) {
+            var bytes_read = reader.interface.readSliceShort(&file_buffer) catch |err| switch (err) {
                 error.ReadFailed => break,
             };
 
-            if (bytes_read < buffer.len) {
-                buffer[bytes_read] = '\x00';
+            if (bytes_read < file_buffer.len) {
+                file_buffer[bytes_read] = '\x00';
                 bytes_read += 1;
             }
 
-            for (buffer[0..bytes_read]) |character| token_process_loop: {
+            for (file_buffer[0..bytes_read]) |character| token_process_loop: {
+                parsed_bytes += 1;
                 if (verbosity > 3) {
                     std.debug.print("-- {f} {d} line spaces: {d} {}\n", .{
                         root.string_utilities.fmtString(&[_]u8{character}),
@@ -111,26 +125,26 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
                             return error.InvalidIndentation;
                         }
                         const new_indent = line_spaces / indent_width;
-                        try line_offsets.append(1);
+                        line_offsets.append(1);
                         if (new_indent == current_indent) {
-                            try column_offsets.append(@intCast(line_spaces + 1));
-                            try token.append('\n');
+                            column_offsets.append(@intCast(line_spaces + 1));
+                            token.append('\n');
                         } else {
                             if (new_indent > current_indent) {
                                 for (0..new_indent - current_indent) |index| {
                                     if (index != 0) {
-                                        try line_offsets.append(0);
+                                        line_offsets.append(0);
                                     }
-                                    try column_offsets.append(@intCast(new_indent * indent_width + 1));
-                                    try token.append('\x01');
+                                    column_offsets.append(@intCast(new_indent * indent_width + 1));
+                                    token.append('\x01');
                                 }
                             } else if (new_indent < current_indent) {
                                 for (0..current_indent - new_indent) |index| {
                                     if (index != 0) {
-                                        try line_offsets.append(0);
+                                        line_offsets.append(0);
                                     }
-                                    try column_offsets.append(@intCast(new_indent * indent_width + 1));
-                                    try token.append('\x02');
+                                    column_offsets.append(@intCast(new_indent * indent_width + 1));
+                                    token.append('\x02');
                                 }
                             }
                             current_indent = new_indent;
@@ -144,9 +158,9 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
                     continue;
                 }
 
-                try line_offsets.append(0);
-                try column_offsets.append(1);
-                try token.append(character);
+                line_offsets.append(0);
+                column_offsets.append(1);
+                token.append(character);
 
                 while (true) {
                     const current_state = state_stack.items[state_stack.items.len - 1];
@@ -247,9 +261,9 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
 
                                     try state_stack.append(gpa, resolution.data_index);
                                     try semantic_stack.append(gpa, node);
-                                    try line_offsets.pop(longest_prefix.len);
-                                    try column_offsets.pop(longest_prefix.len);
-                                    try token.pop(longest_prefix.len);
+                                    line_offsets.pop(longest_prefix.len);
+                                    column_offsets.pop(longest_prefix.len);
+                                    token.pop(longest_prefix.len);
                                 },
                                 .reduce => {
                                     const rule = parse_table.rules[resolution.data_index];
@@ -377,6 +391,9 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
                                     }
                                 },
                                 .accept => {
+                                    line_offsets.pop(longest_prefix.len);
+                                    column_offsets.pop(longest_prefix.len);
+                                    token.pop(1);
                                     if (verbosity > 0) {
                                         std.log.info("The input file was parsed successfully!", .{});
                                     }
@@ -384,11 +401,24 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
                                 },
                             }
                         } else {
-                            return error.Z;
+                            unreachable;
                         }
                     }
                 }
             }
         }
+    }
+
+    if (iterations > 1) {
+        const end = std.Io.Clock.awake.now(init.io);
+        const duration = start.durationTo(end);
+        const elapsed_ns: usize = @intCast(duration.toNanoseconds());
+        const duration_secs = @as(f64, @floatFromInt(elapsed_ns)) / 1e9;
+        const mbps = @as(f64, @floatFromInt(parsed_bytes)) / duration_secs;
+
+        var buffer: [64]u8 = undefined;
+        std.debug.print("Parsed bytes:  {s}\n", .{try root.string_utilities.formatFileSize(parsed_bytes, &buffer)});
+        std.debug.print("Duration:      {s} ns\n", .{try root.string_utilities.formatWithThousands(elapsed_ns, &buffer)});
+        std.debug.print("Throughput:    {s}/s\n", .{try root.string_utilities.formatFileSize(mbps, &buffer)});
     }
 }

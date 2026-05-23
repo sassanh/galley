@@ -2,22 +2,45 @@ const clap = @import("clap");
 const root = @import("root");
 const std = @import("std");
 
+const c = @cImport({
+    @cInclude("signal.h");
+    @cInclude("stdlib.h");
+    @cInclude("setjmp.h");
+});
+
 pub const procedures = @import("procedures");
 pub const parse_table = @import("parse-table");
+pub const read_chunk_size = 128 * 1024;
 
 const data_structures = root.data_structures;
 
-pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
+threadlocal var jmp_env_ptr: ?*c.sigjmp_buf = null;
+export fn segv_handler(sig: c_int, info: [*c]c.siginfo_t, ucontext: ?*anyopaque) callconv(.c) void {
+    _ = sig;
+    _ = info;
+    _ = ucontext;
+
+    // If the thread that segfaulted was actively parsing, jump back to safety.
+    if (jmp_env_ptr) |env| {
+        c.siglongjmp(env, 1);
+    }
+
+    // If it was null, this is a legitimate bug somewhere else in your codebase.
+    // Let it crash normally.
+    c.abort();
+}
+
+pub fn parse(init: std.process.Init) !void {
     const params = comptime clap.parseParamsComptime(
         \\-h, --help                          Display this help and exit.
         \\-v, --verbosity <VERBOSITY_LEVEL>   An option parameter, which takes a value.
-        \\-r, --repeats <REPEAT_TIMES>        Repeat the parse process. Useful for benchmarking.
-        \\<FILE>...
+        \\-r, --iterations <ITERATIONS>       Repeat the parse process. Useful for benchmarking.
+        \\<FILE>
         \\
     );
     const parsers = comptime .{
         .VERBOSITY_LEVEL = clap.parsers.int(usize, 10),
-        .REPEAT_TIMES = clap.parsers.int(usize, 10),
+        .ITERATIONS = clap.parsers.int(usize, 10),
         .FILE = clap.parsers.string,
     };
     var diag = clap.Diagnostic{};
@@ -43,407 +66,106 @@ pub fn parse(init: std.process.Init, program_file: std.Io.File) !void {
     }
 
     const verbosity = if (res.args.verbosity) |verbosity| verbosity else 0;
-    const repeats = if (res.args.repeats) |repeats| repeats else 1;
+    const iterations = if (res.args.iterations) |iterations| iterations else 1;
 
-    const gpa = init.gpa;
-    const arena_allocator = init.arena.allocator();
     const io = init.io;
 
-    for (0..repeats) |_| benchmark_loop: {
-        var symbol_stack = try std.ArrayList(i16).initCapacity(gpa, 64);
-        defer symbol_stack.deinit(gpa);
+    const program_file = if (res.positionals[0]) |path|
+        try std.Io.Dir.cwd().openFile(init.io, path, .{
+            .mode = .read_only,
+            .lock = .exclusive,
+        })
+    else
+        std.Io.File.stdin();
 
-        var semantic_stack = try std.ArrayList(?*root.data_structures.ASTNode).initCapacity(gpa, 64);
-        defer semantic_stack.deinit(gpa);
+    try stack_overflow_protected_run(program_file, verbosity, iterations, io);
+}
 
-        var buffer: [48 * 1024]u8 = undefined;
-        var reader = program_file.reader(io, &buffer);
+fn stack_overflow_protected_run(program_file: std.Io.File, verbosity: usize, iterations: usize, io: std.Io) !void {
+    var context = data_structures.Context{ .verbosity = verbosity };
 
-        var token = data_structures.Token{};
-        var column_offsets = data_structures.Offsets{};
-        var line_offsets = data_structures.Offsets{};
+    // 1. Allocate the Alternate Signal Stack
+    // macOS requires MINSIGSTKSZ, but giving it an extra 8KB is safest.
+    const alt_stack_size = c.SIGSTKSZ + 8192;
+    const alt_stack_mem = try std.heap.page_allocator.alloc(u8, alt_stack_size);
+    defer std.heap.page_allocator.free(alt_stack_mem);
 
-        var current_symbol: u16 = 0;
+    var ss: c.stack_t = undefined;
+    ss.ss_sp = alt_stack_mem.ptr;
+    ss.ss_size = alt_stack_mem.len;
+    ss.ss_flags = 0;
 
-        var line: u16 = 1;
-        var column: u16 = 1;
-        var indent_width: u16 = 0;
-        var current_indent: u16 = 0;
-        var line_spaces: u16 = 0;
-        var is_start_of_line: bool = false;
+    if (c.sigaltstack(&ss, null) != 0) {
+        return error.SignalSetupFailed;
+    }
 
-        while (true) {
-            var bytes_read = reader.interface.readSliceShort(&buffer) catch |err| switch (err) {
-                error.ReadFailed => break,
-            };
+    // 2. Register the Signal Handler
+    var sa: c.struct_sigaction = undefined;
+    sa.__sigaction_u.__sa_sigaction = segv_handler;
+    _ = c.sigemptyset(&sa.sa_mask);
 
-            if (bytes_read < buffer.len) {
-                buffer[bytes_read] = '\x00';
-                bytes_read += 1;
-            }
+    // SA_ONSTACK is mandatory: it forces the OS to use our alt_stack_mem
+    sa.sa_flags = c.SA_SIGINFO | c.SA_ONSTACK;
 
-            for (buffer[0..bytes_read]) |character| token_process_loop: {
-                if (verbosity > 3) {
-                    std.debug.print("-- {f} {d} line spaces: {d} {}\n", .{
-                        root.string_utilities.fmtString(&[_]u8{character}),
-                        character,
-                        line_spaces,
-                        is_start_of_line,
-                    });
-                }
+    _ = c.sigaction(c.SIGSEGV, &sa, null);
+    _ = c.sigaction(c.SIGBUS, &sa, null); // macOS sometimes throws SIGBUS for guard pages
 
-                if (is_start_of_line) {
-                    if (character == ' ') {
-                        line_spaces += 1;
-                        continue;
-                    } else {
-                        is_start_of_line = false;
-                        if (indent_width == 0) {
-                            indent_width = line_spaces;
-                        } else if (line_spaces % indent_width != 0) {
-                            std.log.err("\x1b[35mIndentationError at line {d}:\n\x1b[0mInvalid number of spaces {d} which is not divisible by previousely detected indentation width of \x1b[31m\"{d}\"\x1b[0m.", .{
-                                line + 1,
-                                line_spaces,
-                                indent_width,
-                            });
+    // 3. Prepare the Jump Target
+    var env: c.sigjmp_buf = undefined;
+    jmp_env_ptr = &env;
 
-                            return error.InvalidIndentation;
-                        }
-                        const new_indent = if (indent_width == 0) 0 else line_spaces / indent_width;
-                        try line_offsets.append(1);
-                        if (new_indent == current_indent) {
-                            try column_offsets.append(@intCast(line_spaces + 1));
-                            try token.append('\n');
-                        } else {
-                            if (new_indent > current_indent) {
-                                for (0..new_indent - current_indent) |index| {
-                                    if (index != 0) {
-                                        try line_offsets.append(0);
-                                    }
-                                    try column_offsets.append(@intCast(new_indent * indent_width + 1));
-                                    try token.append('\x01');
-                                }
-                            } else if (new_indent < current_indent) {
-                                for (0..current_indent - new_indent) |index| {
-                                    if (index != 0) {
-                                        try line_offsets.append(0);
-                                    }
-                                    try column_offsets.append(@intCast(new_indent * indent_width + 1));
-                                    try token.append('\x02');
-                                }
-                            }
-                            current_indent = new_indent;
-                        }
-                    }
-                }
+    // Critical: Clean up the pointer when done parsing so a later segfault
+    // elsewhere in your app doesn't accidentally jump back here.
+    defer jmp_env_ptr = null;
 
-                if (character == '\n') {
-                    line_spaces = 0;
-                    is_start_of_line = true;
-                    continue;
-                }
+    // 4. The Zero-Cost Trap
+    // sigsetjmp returns 0 on the direct execution path.
+    // It returns 1 when arriving here asynchronously via siglongjmp.
+    const val = c.sigsetjmp(&env, 0);
 
-                try line_offsets.append(0);
-                try column_offsets.append(1);
-                try token.append(character);
+    if (val == 0) {
+        // --- HOT PATH ---
+        // Absolutely zero overhead. No depth counting. No pointer checks.
+        // LLVM will aggressively inline and unroll the parser.
+        const start = std.Io.Clock.awake.now(io);
 
-                while (true) {
-                    if (verbosity > 1) {
-                        std.debug.print("\n{d}:{d}:\"{f}\", Stack: [{{{s}({d})}}", .{
-                            line,
-                            column,
-                            root.string_utilities.fmtString(token.items()),
-                            parse_table.symbols[current_symbol],
-                            current_symbol,
-                        });
-                        for (symbol_stack.items, 0..) |_, index_| {
-                            const index = symbol_stack.items.len - index_ - 1;
-                            const symbol = symbol_stack.items[index];
-                            std.debug.print(", ", .{});
-                            std.debug.print("{s}({d})", .{
-                                if (symbol < 0)
-                                    parse_table.variables[parse_table.rules[@intCast(-symbol - 1)].header]
-                                else
-                                    parse_table.symbols[@intCast(symbol)],
-                                symbol,
-                            });
-                        }
-                        std.debug.print(" ]\n", .{});
-                    }
-                    const table = parse_table.parse_table[current_symbol];
+        for (0..iterations) |_| {
+            var reader_buffer: [read_chunk_size * 2]u8 = undefined;
+            context.reader = program_file.reader(io, &reader_buffer);
+            context.reset();
 
-                    for (table.keys()) |key| {
-                        if (key.len > token.len and std.mem.startsWith(u8, key, token.items())) {
-                            break :token_process_loop;
-                        }
-                    }
-
-                    if (parse_table.is_terminal[@intCast(current_symbol)]) {
-                        const symbol_text = if (parse_table.is_generative_terminal[@intCast(current_symbol)]) symbol_text: {
-                            if (table.getLongestPrefix(token.items())) |prefix| {
-                                break :symbol_text prefix.key;
-                            } else {
-                                std.log.err("\x1b[35mSyntaxError at {d}:{d}:\x1b[0m unexpected token \x1b[31m\"{f}\"\x1b[0m while expecting \x1b[34m{{{s}}}\x1b[0m.", .{
-                                    line,
-                                    column,
-                                    root.string_utilities.fmtString(token.items()),
-                                    parse_table.symbols[current_symbol],
-                                });
-                                return error.SyntaxError;
-                            }
-                        } else parse_table.symbols[current_symbol];
-
-                        if (token.len < symbol_text.len) {
-                            break;
-                        }
-                        if (std.mem.startsWith(u8, token.items(), symbol_text)) {
-                            var last_newline: i16 = -1;
-                            line += line_offsets.sum(0, symbol_text.len);
-                            for ("\n\x01\x02") |newline_char| {
-                                if (std.mem.lastIndexOfScalar(u8, token.items()[0..symbol_text.len], newline_char)) |index| {
-                                    if (index > last_newline) {
-                                        column = column_offsets.sum(index, symbol_text.len);
-                                        last_newline = @intCast(index);
-                                    }
-                                }
-                            }
-                            if (last_newline == -1) {
-                                column += column_offsets.sum(0, symbol_text.len);
-                            }
-
-                            const node = try arena_allocator.create(root.data_structures.ASTNode);
-                            node.* = .{
-                                .text = try arena_allocator.dupe(u8, token.items()[0..symbol_text.len]),
-                                .label = try std.fmt.allocPrint(arena_allocator, "text '{s}'", .{
-                                    token.items()[0..symbol_text.len],
-                                }),
-                                .variable = 0,
-                                .payload = .{},
-
-                                .right_hand_side_children = &[0]*root.data_structures.ASTNode{},
-                                .children = &[0]*root.data_structures.ASTNode{},
-                            };
-
-                            if (parse_table.is_generative_terminal[@intCast(current_symbol)]) {
-                                var args = data_structures.ProcedureArguments{
-                                    .allocator = arena_allocator,
-                                    .io = init.io,
-                                    .verbosity = verbosity,
-                                    .rule = null,
-                                    .node = node,
-                                };
-
-                                if (parse_table.symbol_procedures[current_symbol]) |procedure_pointer| {
-                                    const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
-                                    try procedure(&args);
-                                }
-
-                                if (parse_table.reduction_procedure) |procedure_pointer| {
-                                    const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
-                                    try procedure(&args);
-                                }
-                            }
-
-                            try semantic_stack.append(gpa, node);
-                            try line_offsets.pop(symbol_text.len);
-                            try column_offsets.pop(symbol_text.len);
-                            try token.pop(symbol_text.len);
-                        }
-                    } else if (table.getLongestPrefix(token.items())) |prefix| {
-                        const longest_prefix = prefix.key;
-                        if (verbosity > 1) {
-                            std.debug.print("Longest prefix: \"{f}\" \"{f}\" {any}\n", .{
-                                root.string_utilities.fmtString(longest_prefix),
-                                root.string_utilities.fmtString(token.items()),
-                                std.mem.eql(u8, longest_prefix, token.items()),
-                            });
-                        }
-
-                        if (std.mem.eql(u8, longest_prefix, token.items()) and token.items()[0] != '\x00') {
-                            break;
-                        } else if (longest_prefix.len < token.len or
-                            (longest_prefix[0] == 0 and token.items()[0] == 0))
-                        {
-                            const rule_index = table.get(longest_prefix).?;
-                            const rule = parse_table.rules[rule_index];
-                            if (verbosity > 1) {
-                                std.debug.print("Rule expansion {d}: {f}({d}) -> ", .{
-                                    rule_index,
-                                    root.string_utilities.fmtString(parse_table.symbols[current_symbol]),
-                                    current_symbol,
-                                });
-                                for (rule.right_hand_side, 0..) |symbol, i| {
-                                    if (i != 0) std.debug.print(", ", .{});
-                                    std.debug.print("{f}({d})", .{
-                                        root.string_utilities.fmtString(parse_table.symbols[@intCast(symbol)]),
-                                        symbol,
-                                    });
-                                }
-                                std.debug.print("\n", .{});
-                            }
-                            try symbol_stack.append(gpa, @intCast(-@as(i32, @intCast(rule_index + 1))));
-                            for (rule.right_hand_side, 0..) |_, i| {
-                                try symbol_stack.append(
-                                    gpa,
-                                    @intCast(rule.right_hand_side[rule.right_hand_side.len - i - 1]),
-                                );
-                            }
-                        }
-                    } else {
-                        std.log.err("\x1b[35mSyntaxError at {d}:{d}:\x1b[0m unexpected token \x1b[31m\"{f}\"\x1b[0m while expecting \x1b[34m{{{s}}}\x1b[0m.", .{
-                            line,
-                            column,
-                            root.string_utilities.fmtString(token.items()),
-                            parse_table.symbols[current_symbol],
-                        });
-
-                        return error.SyntaxError;
-                    }
-
-                    while (symbol_stack.pop()) |popped_symbol| {
-                        if (popped_symbol < 0) {
-                            const rule_index: u16 = @intCast(-popped_symbol - 1);
-                            const rule = parse_table.rules[rule_index];
-                            if (verbosity > 1) {
-                                std.debug.print("Reduction: {s}({d}) <~ ", .{
-                                    parse_table.variables[rule.header],
-                                    rule.header,
-                                });
-                                for (rule.right_hand_side, 0..) |symbol_id, i| {
-                                    if (i != 0) std.debug.print(", ", .{});
-                                    std.debug.print("{f}({d})", .{ root.string_utilities.fmtString(
-                                        if (symbol_id == -1) "-1" else parse_table.symbols[symbol_id],
-                                    ), symbol_id });
-                                }
-                                std.debug.print("\n\n", .{});
-                            }
-
-                            const right_hand_side = try arena_allocator.alloc(
-                                ?*root.data_structures.ASTNode,
-                                rule.right_hand_side.len,
-                            );
-
-                            for (0..rule.right_hand_side.len) |i| {
-                                if (semantic_stack.pop()) |semantic_item| {
-                                    right_hand_side[right_hand_side.len - i - 1] = semantic_item orelse null;
-                                }
-                            }
-                            var combined_text = try std.ArrayList(u8).initCapacity(arena_allocator, 256);
-
-                            var semantic_list_size: usize = 0;
-
-                            for (right_hand_side) |semantic_item| {
-                                if (semantic_item) |child| {
-                                    semantic_list_size += child.augmented_length();
-                                    try combined_text.appendSlice(arena_allocator, try child.augmented_text(arena_allocator));
-                                }
-                            }
-
-                            if (verbosity > 2) {
-                                std.debug.print("{s} text:\n {s}\n\n", .{
-                                    parse_table.variables[rule.header],
-                                    combined_text.items,
-                                });
-                            }
-
-                            const node = try arena_allocator.create(root.data_structures.ASTNode);
-                            node.* = .{
-                                .text = combined_text.items,
-                                .label = parse_table.variables[rule.header],
-                                .variable = rule.header,
-                                .payload = .{},
-
-                                .right_hand_side_children = right_hand_side,
-                                .children = &[0]*root.data_structures.ASTNode{},
-                            };
-
-                            {
-                                if (verbosity > 1) {
-                                    std.debug.print("\nSemantic reduction: {s} <~ ", .{
-                                        parse_table.variables[rule.header],
-                                    });
-                                }
-                                var counter: usize = 0;
-                                for (right_hand_side) |semantic_item| {
-                                    if (semantic_item) |semantic_item_| {
-                                        if (verbosity > 1) {
-                                            var iterator = semantic_item_.iterate_augmented();
-                                            while (iterator.next()) |augmented_item| {
-                                                if (counter != 0) std.debug.print(", ", .{});
-                                                std.debug.print("{s}", .{augmented_item.label});
-                                                counter += 1;
-                                            }
-                                        }
-
-                                        try node.*.append_children(
-                                            arena_allocator,
-                                            semantic_item_.augmented_first(),
-                                        );
-                                    }
-                                }
-                                if (verbosity > 1) {
-                                    std.debug.print("\n\n", .{});
-                                }
-                            }
-
-                            var args = data_structures.ProcedureArguments{
-                                .allocator = arena_allocator,
-                                .io = init.io,
-                                .verbosity = verbosity,
-                                .rule = rule,
-                                .node = node,
-                            };
-
-                            if (parse_table.rule_procedures[rule_index]) |procedure_pointer| {
-                                const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
-                                try procedure(&args);
-                            }
-
-                            var procedure_pointer_head = parse_table.variable_procedures[rule.header];
-                            while (procedure_pointer_head) |procedure_pointer_head_| {
-                                const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer_head_.procedure));
-                                try procedure(&args);
-                                procedure_pointer_head = procedure_pointer_head_.next;
-                            }
-
-                            if (parse_table.symbol_procedures[parse_table.symbol_by_variable[rule.header]]) |procedure_pointer| {
-                                const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
-                                try procedure(&args);
-                            }
-
-                            if (parse_table.reduction_procedure) |procedure_pointer| {
-                                const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
-                                try procedure(&args);
-                            }
-
-                            if (verbosity > 2) {
-                                std.debug.print("Procedure outcome for {s}: {f}\n", .{
-                                    parse_table.variables[rule.header],
-                                    root.string_utilities.fmtASTNode(args.node),
-                                });
-                            }
-
-                            try semantic_stack.append(gpa, args.node);
-                        } else {
-                            current_symbol = @intCast(popped_symbol);
-                            break;
-                        }
-                    } else if (token.len == 1 and token.items()[0] == 0) {
-                        if (verbosity > 0) {
-                            std.log.info("The input file was parsed successfully!", .{});
-                        }
-                        break :benchmark_loop;
-                    } else {
-                        std.log.err("\x1b[35mSyntaxError at {d}:{d}:\x1b[0m unexpected token \x1b[31m\"{f}\"\x1b[0m while expecting \x1b[34m{{EOF}}\x1b[0m.", .{
-                            line,
-                            column - token.len,
-                            root.string_utilities.fmtString(token.items()),
-                        });
-
-                        return error.SyntaxError;
-                    }
-                }
-            }
+            try parse_table.parse(&context);
         }
+
+        if (iterations > 1) {
+            const end = std.Io.Clock.awake.now(io);
+            const duration = start.durationTo(end);
+            const elapsed_ns: usize = @intCast(duration.toNanoseconds());
+            const duration_secs = @as(f64, @floatFromInt(elapsed_ns)) / 1e9;
+            const mbps = @as(f64, @floatFromInt(context.parsed_bytes)) / duration_secs;
+
+            var buffer: [64]u8 = undefined;
+            std.debug.print("Parsed bytes:  {s}\n", .{try root.string_utilities.formatFileSize(context.parsed_bytes, &buffer)});
+            std.debug.print("Duration:      {s} ns\n", .{try root.string_utilities.formatWithThousands(elapsed_ns, &buffer)});
+            std.debug.print("Throughput:    {s}/s\n", .{try root.string_utilities.formatFileSize(mbps, &buffer)});
+        }
+    } else {
+        // --- RECOVERY PATH ---
+        // We arrived here from the signal handler because the hardware MMU caught an overflow.
+        var padding: [10]u8 = undefined;
+        @memset(padding[0..10], ' ');
+        std.debug.print("\x1b[35mStackOverflow at {d}:{d}:\x1b[0m\n" ++
+            "Surounding text: \x1b[37m\"{f}\"\n" ++
+            "                  {s}^\x1b[0m\n" ++
+            "Token content: \x1b[37m\"{f}\"\x1b[34m\x1b[0m\n", .{
+            context.line,
+            context.column,
+            root.string_utilities.fmtString(
+                context.chunk_buffer[context.seek - (context.seek % 10) .. context.seek + (10 - (context.seek % 10))],
+            ),
+            padding[0..(context.seek % 10)],
+            root.string_utilities.fmtString(context.token.items()),
+        });
+        return error.StackOverflow;
     }
 }

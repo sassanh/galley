@@ -1,5 +1,7 @@
 const std = @import("std");
+const parser = @import("parser");
 const ASTNode = @import("root").data_structures.ASTNode;
+const Context = @import("root").data_structures.Context;
 
 const StringSliceFormatter = struct {
     slice: []const []const u8,
@@ -37,7 +39,8 @@ pub fn fmtString(string: []const u8) StringFormatter {
 }
 
 const ASTNodeFormatter = struct {
-    ast_node: ?*const ASTNode,
+    ast_node_address: ?ASTNode.Pointer,
+    context: *Context,
     indentation: usize = 0,
     indent_status: []bool = &[0]bool{},
 
@@ -53,21 +56,33 @@ const ASTNodeFormatter = struct {
             }
         }
 
-        if (self.ast_node) |ast_node| {
-            try writer.print("{f} ({d})\n", .{ fmtString(ast_node.label), ast_node.children.len });
+        if (self.ast_node_address) |ast_node_address| {
+            const ast_node = self.context.node_allocator.at(ast_node_address);
+            try writer.print(" {s} \"{f}\" ({d})\n", .{
+                if (ast_node.variable == std.math.maxInt(u16))
+                    "-"
+                else
+                    parser.parse_table.variables[ast_node.variable],
+                fmtString(self.context.get_text_slice(ast_node.text_start, ast_node.text_length)),
+                if (ast_node.first_child == ASTNode.invalid_pointer)
+                    0
+                else
+                    ASTNode.augmented_length(ast_node.first_child, self.context.node_allocator),
+            });
 
             var child_indent_status: [256]bool = undefined;
             @memcpy(child_indent_status[0..self.indentation], self.indent_status);
             child_indent_status[self.indentation] = false;
 
-            var counter: usize = 0;
-            for (ast_node.children) |child| {
-                counter += 1;
-                if (counter == ast_node.children.len) {
+            var iterator = ASTNode.iterate_augmented(ast_node.first_child, self.context);
+            while (iterator.next()) |node_address| {
+                const node = self.context.node_allocator.at(node_address);
+                if (node.next == ASTNode.invalid_pointer) {
                     child_indent_status[self.indentation] = true;
                 }
                 const f = ASTNodeFormatter{
-                    .ast_node = child,
+                    .ast_node_address = node_address,
+                    .context = self.context,
                     .indentation = self.indentation + 1,
                     .indent_status = child_indent_status[0 .. self.indentation + 1],
                 };
@@ -80,8 +95,11 @@ const ASTNodeFormatter = struct {
     }
 };
 
-pub fn fmtASTNode(ast_node: ?*const ASTNode) ASTNodeFormatter {
-    return .{ .ast_node = ast_node };
+pub fn fmtASTNode(ast_node_address: ?ASTNode.Pointer, context: *Context) ASTNodeFormatter {
+    return .{
+        .ast_node_address = ast_node_address,
+        .context = context,
+    };
 }
 
 pub fn formatWithThousands(value: anytype, buf: []u8) ![]u8 {

@@ -10,7 +10,9 @@ const c = @cImport({
 
 pub const procedures = @import("procedures");
 pub const parse_table = @import("parse-table");
-pub const read_chunk_size = 128 * 1024;
+pub const read_chunk_size = std.math.maxInt(data_structures.Context.Size);
+// pub const read_chunk_size = std.math.maxInt(std.math.Min(data_structures.Context.Size, u16));
+pub const preallocated_nodes = 20_000;
 
 const data_structures = root.data_structures;
 
@@ -32,15 +34,21 @@ export fn segv_handler(sig: c_int, info: [*c]c.siginfo_t, ucontext: ?*anyopaque)
 
 pub fn parse(init: std.process.Init) !void {
     const params = comptime clap.parseParamsComptime(
-        \\-h, --help                          Display this help and exit.
-        \\-v, --verbosity <VERBOSITY_LEVEL>   An option parameter, which takes a value.
-        \\-r, --iterations <ITERATIONS>       Repeat the parse process. Useful for benchmarking.
+        \\-h, --help                        Display this help and exit.
+        \\-v, --verbosity <VERBOSITY_LEVEL> An option parameter, which takes a value.
+        \\-r, --iterations <ITERATIONS>     Repeat the parse process. Useful for benchmarking.
+        \\-w, --warmup-iterations <ITERATIONS>
+        \\                                  Warmup iterations of the parse process.
+        \\                                  Useful for benchmarking.
+        \\    --disable-stack-overflow-recovery
+        \\                                  Disables the stack overflow recovery mechanism
         \\<FILE>
         \\
     );
+
     const parsers = comptime .{
-        .VERBOSITY_LEVEL = clap.parsers.int(usize, 10),
-        .ITERATIONS = clap.parsers.int(usize, 10),
+        .VERBOSITY_LEVEL = clap.parsers.int(u8, 10),
+        .ITERATIONS = clap.parsers.int(u32, 10),
         .FILE = clap.parsers.string,
     };
     var diag = clap.Diagnostic{};
@@ -67,6 +75,7 @@ pub fn parse(init: std.process.Init) !void {
 
     const verbosity = if (res.args.verbosity) |verbosity| verbosity else 0;
     const iterations = if (res.args.iterations) |iterations| iterations else 1;
+    const warmup_iterations = if (@field(res.args, "warmup-iterations")) |warmup_iterations| warmup_iterations else iterations / 10;
 
     const io = init.io;
 
@@ -78,12 +87,30 @@ pub fn parse(init: std.process.Init) !void {
     else
         std.Io.File.stdin();
 
-    try stack_overflow_protected_run(program_file, verbosity, iterations, io);
+    const arena_allocator = init.arena.allocator();
+
+    const reader_buffer = try init.gpa.alloc(u8, read_chunk_size * 2);
+    defer init.gpa.free(reader_buffer);
+
+    var allocator = try data_structures.ASTAllocator.init_capacity(arena_allocator);
+
+    var context = data_structures.Context{
+        .node_allocator = &allocator,
+        .arena_allocator = arena_allocator,
+        .verbosity = verbosity,
+        .io = io,
+        .reader = program_file.reader(io, reader_buffer),
+        .chunk_buffer = try init.gpa.alloc(u8, read_chunk_size),
+    };
+    defer init.gpa.free(context.chunk_buffer);
+
+    if (@field(res.args, "disable-stack-overflow-recovery") > 0)
+        try run(&context, warmup_iterations, iterations)
+    else
+        try stack_overflow_protected_run(&context, warmup_iterations, iterations);
 }
 
-fn stack_overflow_protected_run(program_file: std.Io.File, verbosity: usize, iterations: usize, io: std.Io) !void {
-    var context = data_structures.Context{ .verbosity = verbosity };
-
+fn stack_overflow_protected_run(context: *data_structures.Context, warmup_iterations: usize, iterations: usize) !void {
     // 1. Allocate the Alternate Signal Stack
     // macOS requires MINSIGSTKSZ, but giving it an extra 8KB is safest.
     const alt_stack_size = c.SIGSTKSZ + 8192;
@@ -127,28 +154,8 @@ fn stack_overflow_protected_run(program_file: std.Io.File, verbosity: usize, ite
         // --- HOT PATH ---
         // Absolutely zero overhead. No depth counting. No pointer checks.
         // LLVM will aggressively inline and unroll the parser.
-        const start = std.Io.Clock.awake.now(io);
 
-        for (0..iterations) |_| {
-            var reader_buffer: [read_chunk_size * 2]u8 = undefined;
-            context.reader = program_file.reader(io, &reader_buffer);
-            context.reset();
-
-            try parse_table.parse(&context);
-        }
-
-        if (iterations > 1) {
-            const end = std.Io.Clock.awake.now(io);
-            const duration = start.durationTo(end);
-            const elapsed_ns: usize = @intCast(duration.toNanoseconds());
-            const duration_secs = @as(f64, @floatFromInt(elapsed_ns)) / 1e9;
-            const mbps = @as(f64, @floatFromInt(context.parsed_bytes)) / duration_secs;
-
-            var buffer: [64]u8 = undefined;
-            std.debug.print("Parsed bytes:  {s}\n", .{try root.string_utilities.formatFileSize(context.parsed_bytes, &buffer)});
-            std.debug.print("Duration:      {s} ns\n", .{try root.string_utilities.formatWithThousands(elapsed_ns, &buffer)});
-            std.debug.print("Throughput:    {s}/s\n", .{try root.string_utilities.formatFileSize(mbps, &buffer)});
-        }
+        try run(context, warmup_iterations, iterations);
     } else {
         // --- RECOVERY PATH ---
         // We arrived here from the signal handler because the hardware MMU caught an overflow.
@@ -167,5 +174,40 @@ fn stack_overflow_protected_run(program_file: std.Io.File, verbosity: usize, ite
             root.string_utilities.fmtString(context.token.items()),
         });
         return error.StackOverflow;
+    }
+}
+
+fn run(context: *data_structures.Context, warmup_iterations: usize, iterations: usize) !void {
+    for (0..warmup_iterations) |_| {
+        try context.reset();
+
+        try parse_table.parse(context);
+    }
+
+    var total_parsed_bytes: usize = 0;
+    const start = std.Io.Clock.awake.now(context.io);
+
+    for (0..iterations) |_| {
+        try context.reset();
+
+        try parse_table.parse(context);
+        total_parsed_bytes += context.read_bytes + context.seek;
+    }
+
+    if (iterations > 1) {
+        const end = std.Io.Clock.awake.now(context.io);
+        const duration = start.durationTo(end);
+        const elapsed_ns: usize = @intCast(duration.toNanoseconds());
+        const duration_secs = @as(f64, @floatFromInt(elapsed_ns)) / 1e9;
+        const mbps = @as(f64, @floatFromInt(total_parsed_bytes)) / duration_secs;
+
+        var buffer: [64]u8 = undefined;
+        std.debug.print("Parsed bytes:  {s}\n", .{try root.string_utilities.formatFileSize(total_parsed_bytes, &buffer)});
+        std.debug.print("Duration:      {s} ns\n", .{try root.string_utilities.formatWithThousands(elapsed_ns, &buffer)});
+        std.debug.print("Throughput:    {s}/s\n", .{try root.string_utilities.formatFileSize(mbps, &buffer)});
+        std.debug.print("Nodes allocated:    {s}\n", .{try root.string_utilities.formatWithThousands(
+            context.node_allocator.counter,
+            &buffer,
+        )});
     }
 }

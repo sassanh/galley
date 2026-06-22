@@ -22,6 +22,7 @@ class Symbol:
     index: int = dataclasses.field(init=False)
     procedures: list[bytes] = dataclasses.field(init=False)
     printable: str = dataclasses.field(init=False)
+    is_ast_enabled: bool = dataclasses.field(init=False, default=True)
 
     string_to_symbol: ClassVar[dict[bytes, Symbol]] = {}
 
@@ -152,7 +153,11 @@ class VariableSymbol(Symbol):
     string_to_variable: ClassVar[dict[bytes, VariableSymbol]] = {}
 
     def __post_init__(self):
+        if self.id.startswith(b"_"):
+            self.is_ast_enabled = False
+
         super().__post_init__()
+
         if self.id in VariableSymbol.string_to_variable:
             self.variable_index = VariableSymbol.string_to_variable[
                 self.id
@@ -161,7 +166,9 @@ class VariableSymbol(Symbol):
             self.variable_index = len(VariableSymbol.string_to_variable)
             VariableSymbol.string_to_variable[self.id] = self
 
-        if not is_pascal_case(self.id):
+        if not is_pascal_case(self.id) and (
+            self.id[0:1] != b"_" or not is_pascal_case(self.id[1:])
+        ):
             raise ValueError(
                 f'Variable name "{self.id.decode("utf-8")}" must be PascalCase.'
             )

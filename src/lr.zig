@@ -235,7 +235,7 @@ pub fn parse(init: std.process.Init) !void {
                                         .variable = 0,
                                         .payload = .{},
 
-                                        .right_hand_side_children = &[0]*root.data_structures.ASTNode{},
+                                        // .right_hand_side_children = &[0]*root.data_structures.ASTNode{},
                                         .children = &[0]*root.data_structures.ASTNode{},
                                     };
 
@@ -318,7 +318,7 @@ pub fn parse(init: std.process.Init) !void {
                                         .variable = rule.header,
                                         .payload = .{},
 
-                                        .right_hand_side_children = right_hand_side,
+                                        // .right_hand_side_children = right_hand_side,
                                         .children = &[0]*root.data_structures.ASTNode{},
                                     };
 

@@ -11,14 +11,31 @@ from data_structures import (
     RightHandSide,
     Rule,
     Symbol,
+    TerminalSymbol,
     VariableSymbol,
 )
+
+
+def arg_is_input_size(value):
+    ivalue = int(value)
+    MAX_VAL = 48
+
+    if ivalue > MAX_VAL:
+        raise argparse.ArgumentTypeError(
+            f"{value} is too high! Max allowed is {MAX_VAL} bits."
+        )
+    return ivalue
 
 
 class ParserGeneratorBaseMixin(abc.ABC):
     rules: dict[bytes, list[RightHandSide]]
     symbols: list[Symbol]
     start_variable: VariableSymbol
+
+    with_ast: bool
+    with_procedures: bool
+    ast_for_terminals: bool
+    input_size: int
 
     @property
     @abc.abstractmethod
@@ -32,6 +49,57 @@ class ParserGeneratorBaseMixin(abc.ABC):
     @cached_property
     def arguments_parser(self) -> argparse.ArgumentParser:
         parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "--with-ast",
+            action="store_true",
+            dest="with_ast",
+            default=True,
+            help="Enables AST construction (the default).",
+        )
+        parser.add_argument(
+            "--no-ast",
+            action="store_false",
+            dest="with_ast",
+            default=False,
+            help="Disables AST construction, resulting in faster parse times.",
+        )
+        parser.add_argument(
+            "--with-procedures",
+            action="store_true",
+            dest="with_procedures",
+            default=True,
+            help="Enable procedure hooks (the default).",
+        )
+        parser.add_argument(
+            "--no-procedures",
+            action="store_false",
+            dest="with_procedures",
+            default=False,
+            help="Disables procedure hooks, resulting in faster parse times.",
+        )
+        parser.add_argument(
+            "--ast-for-terminals",
+            action="store_true",
+            dest="ast_for_terminals",
+            default=False,
+            help="Most parsers have a separate lexer/tokenizer and therefor don't "
+            "create ast nodes for each letter. To keep performance high, zig-compiler "
+            "does the same by default.",
+        )
+        parser.add_argument(
+            "--no-ast-for-terminals",
+            action="store_false",
+            dest="ast_for_terminals",
+            default=True,
+            help="Disables ast nodes for terminals, result in faster parse times.",
+        )
+        parser.add_argument(
+            "--input-size",
+            type=arg_is_input_size,
+            dest="input_size",
+            default=16,
+            help='The number of bits required to fit the input size in. (default="16")',
+        )
         return parser
 
     def parse_args(self, argument_strings: Sequence[str] | None) -> None:
@@ -133,6 +201,12 @@ class ParserGeneratorBaseMixin(abc.ABC):
     def variables(self) -> list[VariableSymbol]:
         return sorted(
             symbol for symbol in self.symbols if isinstance(symbol, VariableSymbol)
+        )
+
+    @cached_property
+    def terminals(self) -> list[TerminalSymbol]:
+        return sorted(
+            symbol for symbol in self.symbols if isinstance(symbol, TerminalSymbol)
         )
 
     @cached_property

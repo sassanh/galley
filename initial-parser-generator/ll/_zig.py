@@ -1,3 +1,4 @@
+import re
 from collections import defaultdict
 from functools import cached_property
 
@@ -53,6 +54,10 @@ class LLParserGeneratorZigMixin(
 ):
     _generative_terminal_id: bytes
 
+    def __init__(self) -> None:
+        self._needing_non_ast_mode: set[Symbol] = set()
+        super().__init__()
+
     def patch_grammar(self):
         self._generative_terminal_id = b"GenerativeTerminal"
         self.rules[self._generative_terminal_id].append(RightHandSide(()))
@@ -66,7 +71,7 @@ class LLParserGeneratorZigMixin(
         is_self_repeating: bool,
     ) -> str:
         return "\nelse => " + (
-            "break"
+            "break,"
             if is_self_repeating
             else f"""{{
     std.debug.print("\\x1b[35mSyntaxError at {{d}}:{{d}}:\\n\\x1b[37mUnexpected token \\x1b[31m\\"{{f}}\\"\\x1b[37m while parsing \\x1b[34m{
@@ -91,12 +96,135 @@ class LLParserGeneratorZigMixin(
 }},"""
         )
 
-    def _varaible_case(
+    def _ast_node_logic(
+        self,
+        node_name,
+        symbol: Symbol,
+        rhs: RightHandSide,
+        *,
+        non_ast: bool,
+    ):
+        if not self.with_procedures or not self.with_ast or non_ast:
+            return ""
+        return f"""
+var args = data_structures.ProcedureArguments{{
+    .context = context,
+    .rule = {
+            f"rules[{self.rules_list.index((variable.id, rhs))}]"
+            if isinstance(variable := symbol, VariableSymbol)
+            else "null"
+        },
+    .node = {node_name},
+}};
+{
+            f'''
+if (comptime rule_procedures[{
+                self.rules_list.index((variable.id, rhs))
+            }]) |procedure_pointer| {{
+    const procedure = comptime @as(*data_structures.Procedure, @constCast(procedure_pointer));
+    try procedure(&args);
+}}
+
+'''
+            if isinstance(variable := symbol, VariableSymbol)
+            else ""
+        }{
+            f'''
+comptime var procedure_pointer_head = variable_procedures[{variable.variable_index}];
+inline while (comptime procedure_pointer_head) |procedure_pointer_head_| {{
+    const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer_head_.procedure));
+    try procedure(&args);
+    procedure_pointer_head = procedure_pointer_head_.next;
+}}'''
+            if isinstance(variable := symbol, VariableSymbol)
+            else ""
+        }
+
+if (comptime symbol_procedures[{symbol.index}]) |procedure_pointer| {{
+    const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
+    try procedure(&args);
+}}
+
+if (comptime reduction_procedure) |procedure_pointer| {{
+    const procedure = @as(*data_structures.Procedure, @constCast(procedure_pointer));
+    try procedure(&args);
+}}
+
+if (comptime builtin.mode == .Debug) {{
+    if (context.verbosity > 2) {{
+        std.debug.print("Procedure outcome for {
+            self.token_repr(symbol.id, in_format_string=True)
+        }: {{f}}\\n", .{{
+            string_utilities.fmtASTNode(args.node, context),
+        }});
+    }}
+}}
+"""
+
+    def _add_child_line(
+        self,
+        rhs_symbol: Symbol,
+        *,
+        rhs_symbol_index: int,
+        parent: str,
+        parent_address: str,
+        variable: VariableSymbol | None = None,
+        symbols: tuple[Symbol, ...],
+        rhs_index: int,
+        non_ast: bool,
+        child: str | None = None,
+    ):
+        if (
+            self.with_ast
+            and not non_ast
+            and (self.ast_for_terminals or isinstance(rhs_symbol, VariableSymbol))
+        ):
+            if rhs_symbol.is_ast_enabled:
+                ast_enabled_symbols: list[int] = []
+                ast_enabled_symbols_counter = 0
+                for symbol in symbols:
+                    ast_enabled_symbols.append(ast_enabled_symbols_counter)
+                    if symbol.is_ast_enabled:
+                        ast_enabled_symbols_counter += 1
+                if rhs_symbol is variable:
+                    return f"{parent}.immediate_insert_child({parent_address}, {
+                        f'try parse_{_convert_to_safe_id(repr(rhs_symbol))}_{
+                            rhs_index
+                        }_{rhs_symbol_index}(context)'
+                        if child is None
+                        else child
+                    }, context); // child {rhs_symbol_index}"
+                else:
+                    return f"{parent}.immediate_insert_child({parent_address}, {
+                        f'try parse_{_convert_to_safe_id(repr(rhs_symbol))}(context)'
+                        if child is None
+                        else child
+                    }, context); // child {rhs_symbol_index}"
+
+            else:
+                return f"try parse_{_convert_to_safe_id(repr(rhs_symbol))}_{rhs_index}_{
+                    rhs_symbol_index
+                }(context); // child {rhs_symbol_index}"
+        else:
+            return (
+                f"try parse_{_convert_to_safe_id(repr(rhs_symbol))}_{rhs_index}_{
+                    rhs_symbol_index
+                }{
+                    self._needing_non_ast_mode.add(variable) or '_' if non_ast else ''
+                }(context); // child {rhs_symbol_index}"
+                if rhs_symbol is variable
+                else f"try parse_{_convert_to_safe_id(repr(rhs_symbol))}{
+                    self._needing_non_ast_mode.add(rhs_symbol) or '_' if non_ast else ''
+                }(context); // child {rhs_symbol_index}"
+            )
+
+    def _variable_case(
         self,
         variable: VariableSymbol,
         rhs: RightHandSide,
         *,
         self_repeating_index: int | None,
+        non_ast: bool,
     ) -> str:
         symbols = rhs.symbols
         if not symbols:
@@ -104,26 +232,86 @@ class LLParserGeneratorZigMixin(
 
         if self_repeating_index is not None:
             symbols_left = symbols[:self_repeating_index]
-            return "\n" + "\n".join(
-                [
-                    f"try parse_{_convert_to_safe_id(repr(rhs_symbol))}(context);"
-                    for rhs_symbol in symbols_left
-                ]
+            result = (
+                (
+                    f"""\
+const temporary_address = context.node_allocator.create(context.pos(), {
+                        variable.variable_index
+                    });
+if (node_address == data_structures.ASTNode.invalid_pointer) {{
+    node_address = temporary_address;
+}} else {{
+    {
+                        self._add_child_line(
+                            symbols[self_repeating_index],
+                            rhs_symbol_index=self_repeating_index,
+                            parent="repeating_node",
+                            parent_address="repeating_node_address",
+                            symbols=symbols[: self_repeating_index + 1],
+                            variable=variable,
+                            rhs_index=self.rules[variable.id].index(rhs),
+                            non_ast=non_ast,
+                            child="temporary_address",
+                        )
+                    }
+}}
+repeating_node_address = temporary_address;
+repeating_node = context.node_allocator.at(repeating_node_address);
+"""
+                    + "\n".join(
+                        self._add_child_line(
+                            rhs_symbol,
+                            rhs_symbol_index=rhs_index,
+                            parent="repeating_node",
+                            parent_address="repeating_node_address",
+                            symbols=symbols_left,
+                            variable=variable,
+                            rhs_index=self.rules[variable.id].index(rhs),
+                            non_ast=non_ast,
+                        )
+                        for rhs_index, rhs_symbol in enumerate(symbols_left)
+                    )
+                )
+                if self.with_ast and variable.is_ast_enabled and not non_ast
+                else "\n".join(
+                    self._needing_non_ast_mode.add(rhs_symbol)
+                    or f"try parse_{
+                        _convert_to_safe_id(repr(rhs_symbol))
+                    }_(context); // child {rhs_index}"
+                    for rhs_index, rhs_symbol in enumerate(symbols_left)
+                )
+                if self.with_ast and not non_ast
+                else "\n".join(
+                    f"try parse_{_convert_to_safe_id(repr(rhs_symbol))}{
+                        self._needing_non_ast_mode.add(variable) or '_'
+                        if non_ast
+                        else ''
+                    }(context); // child {rhs_index}"
+                    for rhs_index, rhs_symbol in enumerate(symbols_left)
+                )
+            ) + (
+                ""
+                if self.with_ast and variable.is_ast_enabled and not non_ast
+                else "\ncounter += 1;"
+                if len(rhs.symbols) > self_repeating_index + 1
+                else ""
             )
         else:
             result = (
                 "\n".join(
-                    [
-                        f"try parse_{_convert_to_safe_id(repr(rhs_symbol))}_{
-                            self.rules[variable.id].index(rhs)
-                        }_{rhs_index}(context);"
-                        if rhs_symbol is variable
-                        else f"try parse_{_convert_to_safe_id(repr(rhs_symbol))}(context);"
-                        for rhs_index, rhs_symbol in enumerate(symbols)
-                    ]
+                    self._add_child_line(
+                        rhs_symbol,
+                        rhs_symbol_index=rhs_index,
+                        parent="context.node_allocator.at(node_address)",
+                        parent_address="node_address",
+                        symbols=symbols,
+                        variable=variable,
+                        rhs_index=self.rules[variable.id].index(rhs),
+                        non_ast=non_ast,
+                    )
+                    for rhs_index, rhs_symbol in enumerate(symbols)
                 )
-                + "\n"
-            )
+            ) + self._ast_node_logic("node_address", variable, rhs, non_ast=non_ast)
 
         return (
             f"""
@@ -143,24 +331,49 @@ if (comptime builtin.mode == .Debug) {{
 }}
 """
             + result
-            + f"""
+            + (
+                f"""
 if (comptime builtin.mode == .Debug) {{
     if (context.verbosity > 1) {{
         std.debug.print("Reduction: {repr(variable)} <~ {
-                ", ".join(
-                    [
-                        f"'{self.token_repr(symbol.id, in_format_string=True)}'"
-                        if isinstance(symbol, TerminalSymbol)
-                        else self.token_repr(symbol.id)
-                        for symbol in symbols
-                    ]
-                )
-            }\\n", .{{}});
+                    ", ".join(
+                        [
+                            f"'{self.token_repr(symbol.id, in_format_string=True)}'"
+                            if isinstance(symbol, TerminalSymbol)
+                            else self.token_repr(symbol.id)
+                            for symbol in symbols
+                        ]
+                    )
+                }\\n", .{{}});
     }}
 }}"""
+                if self_repeating_index is None
+                else ""
+            )
         )
 
-    def _terminal_case(self, length: int) -> str:
+    def _terminal_case(
+        self,
+        length: int,
+        terminal: TerminalSymbol,
+        rhs: RightHandSide,
+        *,
+        non_ast: bool,
+    ) -> str:
+        if self.with_ast and not non_ast:
+            return f"""
+// node.text_length = {length};
+context.release_token({length});""" + (
+                self._ast_node_logic(
+                    "node_address",
+                    terminal,
+                    rhs,
+                    non_ast=non_ast,
+                )
+                if self.ast_for_terminals
+                else ""
+            )
+
         return f"\ncontext.release_token({length});"
 
     def _rule_cases(
@@ -186,6 +399,7 @@ if (comptime builtin.mode == .Debug) {{
         prefix_length: int = 0,
         *,
         self_repeating_index: int | None = None,
+        non_ast: bool,
     ) -> str:
         sample_key = next(
             iter(
@@ -197,42 +411,47 @@ if (comptime builtin.mode == .Debug) {{
         )
         key_length = len(sample_key)
         return f"""\
-switch (context.head(u{key_length * 8}, {prefix_length}, {key_length})) {{
+switch (context.head(u{key_length * 8}, {prefix_length})) {{
     {
             "\n    ".join(
-                [
-                    self._rule_cases(
-                        terminals,
-                        code
-                        if (
-                            code := (
-                                self._varaible_case(
-                                    symbol,
-                                    outcome,
-                                    self_repeating_index=self_repeating_index,
-                                )
-                                if isinstance(symbol, VariableSymbol)
-                                else self._terminal_case(
-                                    prefix_length
-                                    if terminals == (b"",)
-                                    else prefix_length + key_length
-                                )
-                            )
-                            if isinstance(outcome, RightHandSide)
-                            else "\n"
-                            + self._rule_switch(
+                self._rule_cases(
+                    terminals,
+                    code
+                    if (
+                        code := (
+                            self._variable_case(
                                 symbol,
                                 outcome,
+                                self_repeating_index=self_repeating_index,
+                                non_ast=non_ast,
+                            )
+                            if isinstance(symbol, VariableSymbol)
+                            else self._terminal_case(
                                 prefix_length
                                 if terminals == (b"",)
                                 else prefix_length + key_length,
-                                self_repeating_index=self_repeating_index,
+                                symbol,
+                                outcome,
+                                non_ast=non_ast,
                             )
+                            if isinstance(symbol, TerminalSymbol)
+                            else ""
                         )
-                        else "",
-                    ).replace("\n", "\n    ")
-                    for terminals, outcome in sorted(items.items())
-                ]
+                        if isinstance(outcome, RightHandSide)
+                        else "\n"
+                        + self._rule_switch(
+                            symbol,
+                            outcome,
+                            prefix_length
+                            if terminals == (b"",)
+                            else prefix_length + key_length,
+                            self_repeating_index=self_repeating_index,
+                            non_ast=non_ast,
+                        )
+                    )
+                    else "",
+                ).replace("\n", "\n    ")
+                for terminals, outcome in sorted(items.items())
             )
         }{
             self._switch_else(
@@ -243,7 +462,7 @@ switch (context.head(u{key_length * 8}, {prefix_length}, {key_length})) {{
         }
 }}"""
 
-    def _zig_reducer(self, symbol: Symbol) -> str:
+    def _zig_reducer(self, symbol: Symbol, *, non_ast: bool = False) -> str:
         result = ""
 
         if isinstance(terminal := symbol, TerminalSymbol):
@@ -273,58 +492,186 @@ switch (context.head(u{key_length * 8}, {prefix_length}, {key_length})) {{
                         self_repeating_index = rhs.symbols.index(
                             variable, self_repeating_index + 1
                         )
-                        result += f"""\
-// Self-repeating parser for symbol "{repr(symbol)}" at index {
-                            symbol.index
-                        } of its right hand side
+                        result += (
+                            f"""\
+// {"Non-AST " if non_ast else ""}Self-Repeating Parser for Symbol "{
+                                repr(symbol)
+                            }" at index {self_repeating_index} of its right hand side
 // Right hand side: -> {
-                            ", ".join(
-                                [
-                                    f"'{self.token_repr(symbol.id, in_format_string=True)}'"
-                                    if isinstance(symbol, TerminalSymbol)
-                                    else self.token_repr(symbol.id)
-                                    for symbol in rhs.symbols
-                                ]
-                            )
-                        }
-inline fn parse_{repr(symbol)}_{self.rules[variable.id].index(rhs)}_{
-                            self_repeating_index
-                        }(context: *data_structures.Context) error {{ StackOverflow, InvalidIndentation, SyntaxError }}!void {{
-{
-                            "    var counter: usize = 0;\n"
-                            if len(rhs.symbols) > self_repeating_index + 1
-                            else ""
-                        }    while (true) {{
-        {
-                            self._rule_switch(
-                                symbol,
-                                rhs_items,
-                                self_repeating_index=self_repeating_index,
-                            ).replace("\n", "\n        ")
-                        }
-{"        counter += 1;\n" if len(rhs.symbols) > self_repeating_index + 1 else ""}    }}
-
-    try parse_{_convert_to_safe_id(repr(variable))}(context);{
-                            f'''
-    for (0..counter) |_| {{
-        {
-                                "\n    ".join(
+                                ", ".join(
                                     [
-                                        f"try parse_{_convert_to_safe_id(repr(rhs_symbol))}(context);"
-                                        for rhs_symbol in rhs.symbols[
-                                            self_repeating_index + 1 :
-                                        ]
+                                        f"'{self.token_repr(symbol.id, in_format_string=True)}'"
+                                        if isinstance(symbol, TerminalSymbol)
+                                        else self.token_repr(symbol.id)
+                                        for symbol in rhs.symbols
                                     ]
                                 )
                             }
+fn parse_{repr(symbol)}_{self.rules[variable.id].index(rhs)}_{self_repeating_index}{
+                                "_" if non_ast else ""
+                            }(context: *data_structures.Context) anyerror!{
+                                "data_structures.ASTNode.Pointer"
+                                if self.with_ast
+                                and variable.is_ast_enabled
+                                and not non_ast
+                                else "void"
+                            } {{
+"""
+                            + (
+                                """\
+    var node_address = data_structures.ASTNode.invalid_pointer;
+    var repeating_node_address = node_address;
+    var repeating_node: *data_structures.ASTNode = undefined;
+"""
+                                if self.with_ast
+                                and not non_ast
+                                and variable.is_ast_enabled
+                                else """
+    var counter: usize = 0;
+"""
+                                if len(rhs.symbols) > self_repeating_index + 1
+                                else ""
+                            )
+                            + f"""
+    while (true) {{
+        {
+                                self._rule_switch(
+                                    symbol,
+                                    rhs_items,
+                                    self_repeating_index=self_repeating_index,
+                                    non_ast=non_ast,
+                                ).replace("\n", "\n        ")
+                            }
     }}
-'''
-                            if len(rhs.symbols) > self_repeating_index + 1
-                            else ""
-                        }
-}}
+"""
+                            + (
+                                f"""\
+    const exit_node = try parse_{repr(symbol)}(context);
+    if (node_address == data_structures.ASTNode.invalid_pointer) {{
+        node_address = exit_node;
+    }} else {{
+        {
+                                    self._add_child_line(
+                                        rhs.symbols[self_repeating_index],
+                                        rhs_symbol_index=self_repeating_index,
+                                        parent="repeating_node",
+                                        parent_address="repeating_node_address",
+                                        symbols=rhs.symbols,
+                                        variable=variable,
+                                        rhs_index=self.rules[variable.id].index(rhs),
+                                        non_ast=non_ast,
+                                        child="exit_node",
+                                    )
+                                }
+    }}
+    while (repeating_node_address != data_structures.ASTNode.invalid_pointer) {{
+        repeating_node = context.node_allocator.at(repeating_node_address);
+        {
+                                    "\n        ".join(
+                                        self._add_child_line(
+                                            rhs_symbol,
+                                            rhs_symbol_index=rhs_index
+                                            + self_repeating_index
+                                            + 1,
+                                            parent="repeating_node",
+                                            parent_address="repeating_node_address",
+                                            symbols=rhs.symbols,
+                                            variable=variable,
+                                            rhs_index=self.rules[variable.id].index(
+                                                rhs
+                                            ),
+                                            non_ast=non_ast,
+                                        )
+                                        for rhs_index, rhs_symbol in enumerate(
+                                            rhs.symbols[self_repeating_index + 1 :]
+                                        )
+                                    )
+                                    if len(rhs.symbols) > self_repeating_index + 1
+                                    else ""
+                                }
+{
+                                    f'''
+        if (comptime builtin.mode == .Debug) {{
+            if (context.verbosity > 1) {{
+                std.debug.print("Reduction: {repr(variable)} <~ {
+                                        ", ".join(
+                                            [
+                                                f"'{self.token_repr(symbol.id, in_format_string=True)}'"
+                                                if isinstance(symbol, TerminalSymbol)
+                                                else self.token_repr(symbol.id)
+                                                for symbol in rhs.symbols
+                                            ]
+                                        )
+                                    }\\n", .{{}});
+            }}
+        }}'''
+                                }
+                        {
+                                    self._ast_node_logic(
+                                        "repeating_node_address",
+                                        variable,
+                                        rhs,
+                                        non_ast=non_ast,
+                                    ).replace("\n", "\n        ")
+                                }
+        repeating_node_address = repeating_node.parent;
+    }}
+    return node_address;
+"""
+                                if self.with_ast
+                                and variable.is_ast_enabled
+                                and not non_ast
+                                else self._needing_non_ast_mode.add(variable)
+                                or f"""\
+    try parse_{_convert_to_safe_id(repr(variable))}_(context);
+"""
+                                if self.with_ast and not non_ast
+                                else f"""\
+    try parse_{_convert_to_safe_id(repr(variable))}{
+                                    self._needing_non_ast_mode.add(variable) or "_"
+                                    if non_ast
+                                    else ""
+                                }(context);
+"""
+                                + (
+                                    f"""
+    for (0..counter) |_| {{
+        {
+                                        "\n        ".join(
+                                            [
+                                                f"try parse_{
+                                                    _convert_to_safe_id(
+                                                        repr(rhs_symbol)
+                                                    )
+                                                }{
+                                                    self._needing_non_ast_mode.add(
+                                                        variable
+                                                    )
+                                                    or '_'
+                                                    if non_ast
+                                                    else ''
+                                                }(context); // child {
+                                                    self_repeating_index + 1 + rhs_index
+                                                }"
+                                                for rhs_index, rhs_symbol in enumerate(
+                                                    rhs.symbols[
+                                                        self_repeating_index + 1 :
+                                                    ]
+                                                )
+                                            ]
+                                        )
+                                    }
+    }}
+"""
+                                    if len(rhs.symbols) > self_repeating_index + 1
+                                    else ""
+                                )
+                            )
+                            + """\
+}
 
 """
+                        )
                 except ValueError:
                     pass
 
@@ -334,13 +681,39 @@ inline fn parse_{repr(symbol)}_{self.rules[variable.id].index(rhs)}_{
         items = _switch_dict(table)
 
         result += f"""\
-// Parser for symbol "{repr(symbol)}" with index {symbol.index}
+// {"Non-AST " if non_ast else ""}Parser for Symbol "{repr(symbol)}" with index {
+            symbol.index
+        }
 {"inline " if isinstance(symbol, TerminalSymbol) else ""}fn parse_{
             _convert_to_safe_id(repr(symbol))
-        }(context: *data_structures.Context) error{{ StackOverflow, InvalidIndentation, SyntaxError }}!void {{
-    {self._rule_switch(symbol, items).replace("\n", "\n    ")}
+        }{"_" if non_ast else ""}(context: *data_structures.Context) anyerror!{
+            "data_structures.ASTNode.Pointer"
+            if self.with_ast
+            and not non_ast
+            and (self.ast_for_terminals or isinstance(symbol, VariableSymbol))
+            else "void"
+        } {{{
+            f'''
+    const node_address = context.node_allocator.create(context.pos(), {
+                variable.variable_index
+                if isinstance(variable := symbol, VariableSymbol)
+                else "data_structures.ASTNode.invalid_variable"
+            });
+'''
+            if self.with_ast
+            and not non_ast
+            and (self.ast_for_terminals or isinstance(symbol, VariableSymbol))
+            else ""
+        }
+    {self._rule_switch(symbol, items, non_ast=non_ast).replace("\n", "\n    ")}{
+            "\n    return node_address;"
+            if self.with_ast
+            and not non_ast
+            and (self.ast_for_terminals or isinstance(symbol, VariableSymbol))
+            else ""
+        }
 }}"""
-        return result
+        return re.sub(r"\n\s+\n", "\n\n", result)
 
     @cached_property
     def zig_parser(self) -> str:
@@ -349,18 +722,28 @@ inline fn parse_{repr(symbol)}_{self.rules[variable.id].index(rhs)}_{
 {self.zig_base}
 
 {"\n\n".join([code for symbol in self.symbols if (code := self._zig_reducer(symbol))])}
+{self._non_ast_parsers()}
 
 pub fn parse(context: *data_structures.Context) !void {{
-    parse_AugmentedStart(context) catch {{
+    _ = parse_AugmentedStart(context) catch {{
         if (comptime builtin.mode == .Debug) {{
             return error.ParseError;
         }}
-        context.parsed_bytes += context.seek;
         return;
     }};
 
-    context.parsed_bytes += context.seek;
     if (context.verbosity > 0) {{
         std.log.info("The input file was parsed successfully!", .{{}});
     }}
 }}"""
+
+    def _non_ast_parsers(self) -> str:
+        generated_parsers: set[Symbol] = set()
+        result = ""
+        while self._needing_non_ast_mode - generated_parsers:
+            for symbol in self._needing_non_ast_mode - generated_parsers:
+                generated_parsers.add(symbol)
+                if code := self._zig_reducer(symbol, non_ast=True):
+                    result += "\n\n" + code
+
+        return result

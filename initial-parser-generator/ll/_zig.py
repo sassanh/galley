@@ -88,8 +88,8 @@ class LLParserGeneratorZigMixin(
                     in_format_string=True,
                 )
             }\\'\\x1b[0m\\n", .{{
-        context.line,
-        context.column,
+        if (comptime builtin.mode != .ReleaseFast) context.line else 0,
+        if (comptime builtin.mode != .ReleaseFast) context.column else 0,
         string_utilities.fmtString(context.token.items()),
     }});
     return error.SyntaxError;

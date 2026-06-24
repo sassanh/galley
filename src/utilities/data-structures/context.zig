@@ -1,5 +1,5 @@
-const std = @import("std");
 const builtin = @import("builtin");
+const std = @import("std");
 const data_structures = @import("root").data_structures;
 const string_utilities = @import("root").string_utilities;
 
@@ -28,12 +28,18 @@ pub const Context = struct {
 
     reader: std.Io.File.Reader = undefined,
     chunk_buffer: []u8 = undefined,
-    line: u32 = 1,
-    column: u32 = 1,
+    line: if (builtin.mode != .ReleaseFast) u32 else void = if (builtin.mode != .ReleaseFast) 1 else {},
+    column: if (builtin.mode != .ReleaseFast) u32 else void = if (builtin.mode != .ReleaseFast) 1 else {},
 
     token: data_structures.Token = .{},
-    column_offsets: data_structures.Offsets = .{},
-    line_offsets: data_structures.Offsets = .{},
+    line_offsets: if (builtin.mode != .ReleaseFast)
+        data_structures.Offsets
+    else
+        void = if (builtin.mode != .ReleaseFast) .{} else {},
+    column_offsets: if (builtin.mode != .ReleaseFast)
+        data_structures.Offsets
+    else
+        void = if (builtin.mode != .ReleaseFast) .{} else {},
 
     indent_width: u16 = 0,
     current_indent: u16 = 0,
@@ -93,11 +99,13 @@ pub const Context = struct {
         try self.reader.seekTo(0);
         self.read_bytes = 0;
         self.seek = 0;
-        self.line = 1;
-        self.column = 1;
+        if (comptime builtin.mode != .ReleaseFast) {
+            self.line = 1;
+            self.column = 1;
+            self.line_offsets.reset();
+            self.column_offsets.reset();
+        }
         self.token.reset();
-        self.column_offsets.reset();
-        self.line_offsets.reset();
         self.node_allocator.reset();
         self.read();
     }
@@ -138,7 +146,7 @@ pub const Context = struct {
                     self.indent_width = line_spaces;
                 } else if (line_spaces % self.indent_width != 0) {
                     std.log.err("\x1b[35mIndentationError at line {d}:\n\x1b[0mInvalid number of spaces {d} which is not divisible by previousely detected indentation width of \x1b[31m\"{d}\"\x1b[0m.", .{
-                        self.line + 1,
+                        if (comptime builtin.mode != .ReleaseFast) self.line + 1 else 0,
                         line_spaces,
                         self.indent_width,
                     });
@@ -198,8 +206,8 @@ pub const Context = struct {
         if (comptime builtin.mode == .Debug) {
             if (self.verbosity > 1) {
                 std.debug.print("\n{d}:{d}:\"{f}\"\n", .{
-                    self.line,
-                    self.column,
+                    if (comptime builtin.mode != .ReleaseFast) self.line else 0,
+                    if (comptime builtin.mode != .ReleaseFast) self.column else 0,
                     string_utilities.fmtString(self.token.items()),
                 });
             }

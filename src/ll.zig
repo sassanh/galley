@@ -1,3 +1,4 @@
+const builtin = @import("builtin");
 const clap = @import("clap");
 const root = @import("root");
 const std = @import("std");
@@ -164,8 +165,8 @@ fn stack_overflow_protected_run(context: *data_structures.Context, warmup_iterat
             "Surounding text: \x1b[37m\"{f}\"\n" ++
             "                  {s}^\x1b[0m\n" ++
             "Token content: \x1b[37m\"{f}\"\x1b[34m\x1b[0m\n", .{
-            context.line,
-            context.column,
+            if (comptime builtin.mode != .ReleaseFast) context.line else 0,
+            if (comptime builtin.mode != .ReleaseFast) context.column else 0,
             root.string_utilities.fmtString(
                 context.chunk_buffer[context.seek - (context.seek % 10) .. context.seek + (10 - (context.seek % 10))],
             ),

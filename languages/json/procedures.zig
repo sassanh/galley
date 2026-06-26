@@ -1,5 +1,4 @@
 const std = @import("std");
-const parser = @import("parser");
 const data_structures = @import("root").data_structures;
 const ProcedureArguments = data_structures.ProcedureArguments;
 const string_utilities = @import("root").string_utilities;

@@ -1,7 +1,6 @@
 const std = @import("std");
 const builtin = @import("builtin");
 const Context = @import("root").data_structures.Context;
-const parser = @import("parser");
 const root = @import("root");
 
 pub fn ASTAllocator(comptime PayloadType: type) type {

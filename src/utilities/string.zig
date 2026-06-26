@@ -1,5 +1,5 @@
 const std = @import("std");
-const parser = @import("parser");
+const parse_table = @import("root").parse_table;
 const ASTNode = @import("root").data_structures.ASTNode;
 const Context = @import("root").data_structures.Context;
 
@@ -62,7 +62,7 @@ const ASTNodeFormatter = struct {
                 if (ast_node.variable == std.math.maxInt(u16))
                     "-"
                 else
-                    parser.parse_table.variables[ast_node.variable],
+                    parse_table.variables[ast_node.variable],
                 fmtString(self.context.get_text_slice(ast_node.text_start, ast_node.text_length)),
                 if (ast_node.first_child == ASTNode.invalid_pointer)
                     0

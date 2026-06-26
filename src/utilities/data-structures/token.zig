@@ -1,7 +1,7 @@
 const builtin = @import("builtin");
 const std = @import("std");
 const Context = @import("context.zig").Context;
-const parser = @import("parser");
+const parse_table = @import("root").parse_table;
 
 pub const Token = struct {
     pub const max_length = 65500; //@max(6, parser.parse_table.longest_terminal_length);

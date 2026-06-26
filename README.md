@@ -99,7 +99,6 @@ initial-parser-generator/   Python parser generator (LL, LR, GLR)
 
 src/                        Zig runtime
   main.zig                  Entry point, benchmarking harness
-  ll.zig / lr.zig / glr.zig Parser driver shims
   utilities/
     data-structures/
       astnode.zig           ASTNode and ASTAllocator (u16-indexed pool)

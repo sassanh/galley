@@ -2,8 +2,7 @@ const std = @import("std");
 const ProcedureArguments = @import("root").data_structures.ProcedureArguments;
 const ASTNode = @import("root").data_structures.ASTNode;
 const string_utilities = @import("root").string_utilities;
-const data_structures = @import("root").data_structures;
-const parser = @import("parser");
+const parse_table = @import("root").parse_table;
 
 const control_characters_uppper_bound = 4;
 
@@ -229,7 +228,7 @@ pub fn reduction_Rule(args: *ProcedureArguments) !void {
                     if (args.rule.?.header == -1)
                         "-1"
                     else
-                        parser.parse_table.variables[args.rule.?.header],
+                        parse_table.variables[args.rule.?.header],
                 ),
                 args.rule.?.header,
             });
@@ -238,7 +237,7 @@ pub fn reduction_Rule(args: *ProcedureArguments) !void {
                     string_utilities.fmtString(if (idx == -1)
                         "-1"
                     else
-                        parser.parse_table.symbols[idx]),
+                        parse_table.symbols[idx]),
                     idx,
                 });
             }

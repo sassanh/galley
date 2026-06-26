@@ -1,3 +1,4 @@
+from collections import defaultdict
 from functools import cached_property
 from typing import Literal
 
@@ -7,6 +8,36 @@ from data_structures import (
     TerminalSymbol,
     VariableSymbol,
 )
+
+type SwitchDict[T] = dict[tuple[bytes, ...], SwitchDict[T] | T]
+
+
+def _switch_dict[T](table: dict[bytes, T]) -> SwitchDict[T]:
+    items: dict[bytes, set[tuple[bytes, bool, T]]] = defaultdict(set)
+    payload_lookup: dict[tuple[tuple[bytes, bool, T], ...], set[bytes]] = defaultdict(
+        set
+    )
+
+    non_empty = [len(term) for term in table if len(term) > 0]
+    if not non_empty:
+        return {(b"",): next(iter(table.values()))} if b"" in table else {}
+
+    step_length = min(non_empty)
+
+    for terminal, rhs in table.items():
+        items[terminal[:step_length]].add(
+            (terminal[step_length:], len(terminal[:step_length]) > 0, rhs)
+        )
+
+    for head, payload in items.items():
+        payload_lookup[tuple(sorted(payload, key=lambda x: (x[0], x[1])))].add(head)
+
+    return {
+        tuple(sorted(heads)): logic_payload[0][2]
+        if len(logic_payload) <= 1 and len(logic_payload[0][0]) == 0
+        else _switch_dict({terminal: rule for terminal, _, rule in logic_payload})
+        for logic_payload, heads in payload_lookup.items()
+    }
 
 
 class ParserGeneratorZigMixin(ParserGeneratorBaseMixin):
@@ -26,13 +57,12 @@ class ParserGeneratorZigMixin(ParserGeneratorBaseMixin):
         return f"""\
 const builtin = @import("builtin");
 const std = @import("std");
+const procedures = @import("root").procedures;
 const data_structures = @import("root").data_structures;
 const string_utilities = @import("root").string_utilities;
-const parser = @import("parser");
 
 pub const is_ast_enabled = {self.with_ast and "true" or "false"};
 pub const input_size_cap = u{self.input_size};
-pub const parse_table_type = "{self.parser_type}";
 pub const longest_terminal_length = {
             max(
                 len(terminal)
@@ -109,8 +139,8 @@ pub const rule_procedures = rule_procedures: {{
 
     for (rules, 0..) |rule, index| {{
         const procedure_name = "reduction_" ++ variables[rule.header] ++ "_" ++ rule.right_hand_side_index;
-        if (@hasDecl(parser.procedures, procedure_name)) {{
-            arr[index] = data_structures.wrap_procedure(data_structures.Procedure, @field(parser.procedures, procedure_name), procedure_name);
+        if (@hasDecl(procedures, procedure_name)) {{
+            arr[index] = data_structures.wrap_procedure(data_structures.Procedure, @field(procedures, procedure_name), procedure_name);
         }}
     }}
 
@@ -124,8 +154,8 @@ pub const symbol_procedures = symbol_procedures: {{
 
     for (symbols, 0..) |symbol, index| {{
         const procedure_name = "reduction_" ++ symbol;
-        if (@hasDecl(parser.procedures, procedure_name)) {{
-            arr[index] = data_structures.wrap_procedure(data_structures.Procedure, @field(parser.procedures, procedure_name), symbol);
+        if (@hasDecl(procedures, procedure_name)) {{
+            arr[index] = data_structures.wrap_procedure(data_structures.Procedure, @field(procedures, procedure_name), symbol);
         }}
     }}
 
@@ -166,7 +196,7 @@ pub const variable_procedures = variable_procedures: {{
         var last: ?*const ProcedureSequenceNode = null;
         for (procedure_names) |procedure_name| {{
             last = &ProcedureSequenceNode{{
-                .procedure = data_structures.wrap_procedure(data_structures.Procedure, @field(parser.procedures, procedure_name), procedure_name),
+                .procedure = data_structures.wrap_procedure(data_structures.Procedure, @field(procedures, procedure_name), procedure_name),
                 .next = last,
             }};
             arr[index] = last;
@@ -176,4 +206,4 @@ pub const variable_procedures = variable_procedures: {{
     break :variable_procedures arr;
 }};
 
-pub const reduction_procedure: ?*const data_structures.Procedure = if (@hasDecl(parser.procedures, "reduction")) data_structures.wrap_procedure(data_structures.Procedure, @field(parser.procedures, "reduction"), "reduction") else null;"""
+pub const reduction_procedure: ?*const data_structures.Procedure = if (@hasDecl(procedures, "reduction")) data_structures.wrap_procedure(data_structures.Procedure, @field(procedures, "reduction"), "reduction") else null;"""

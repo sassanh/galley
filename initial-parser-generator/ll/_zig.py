@@ -2,7 +2,7 @@ import re
 from collections import defaultdict
 from functools import cached_property
 
-from base._zig import ParserGeneratorZigMixin
+from base._zig import ParserGeneratorZigMixin, SwitchDict, _switch_dict
 from data_structures import RightHandSide, Symbol, TerminalSymbol, VariableSymbol
 from ll._parse_table import LLParserGeneratorParseTableMixin
 
@@ -17,35 +17,6 @@ def _convert_to_safe_id(text: str) -> str:
             result.append(f"_x{ord(char)}")
 
     return "".join(result)
-
-
-type SwitchDict[T] = dict[tuple[bytes, ...], SwitchDict[T] | T]
-
-
-def _switch_dict(
-    table: dict[bytes, RightHandSide],
-) -> SwitchDict[RightHandSide]:
-    items: dict[bytes, set[tuple[bytes, bool, RightHandSide]]] = defaultdict(set)
-    payload_lookup: dict[tuple[tuple[bytes, bool, RightHandSide], ...], set[bytes]] = (
-        defaultdict(set)
-    )
-
-    step_length = min(length for terminal in table if (length := len(terminal)))
-
-    for terminal, rhs in table.items():
-        items[terminal[:step_length]].add(
-            (terminal[step_length:], len(terminal[:step_length]) > 0, rhs)
-        )
-
-    for head, payload in items.items():
-        payload_lookup[tuple(sorted(payload))].add(head)
-
-    return {
-        tuple(sorted(heads)): logic_payload[0][2]
-        if len(logic_payload) <= 1 and len(logic_payload[0][0]) == 0
-        else _switch_dict({terminal: rule for terminal, _, rule in logic_payload})
-        for logic_payload, heads in payload_lookup.items()
-    }
 
 
 class LLParserGeneratorZigMixin(

@@ -106,7 +106,7 @@ fn run(context: *data_structures.Context, warmup_iterations: usize, iterations: 
         try context.reset();
 
         try parser.parse(context);
-        total_parsed_bytes += context.read_bytes + context.seek;
+        total_parsed_bytes += context.pos();
     }
 
     if (iterations > 1) {

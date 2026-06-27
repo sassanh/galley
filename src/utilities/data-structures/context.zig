@@ -43,7 +43,7 @@ pub const Context = struct {
     indent_width: u16 = 0,
     current_indent: u16 = 0,
 
-    seek: Size = 0,
+    seek: if (root.procedures.indentation_syntax) Size else void = if (root.procedures.indentation_syntax) 0 else {},
     read_bytes: Size = 0,
     verbosity: usize,
 
@@ -97,37 +97,45 @@ pub const Context = struct {
 
         try self.reader.seekTo(0);
         self.read_bytes = 0;
-        self.seek = 0;
+        if (comptime root.procedures.indentation_syntax) {
+            self.seek = 0;
+        }
         if (comptime builtin.mode != .ReleaseFast) {
             self.line = 1;
             self.column = 1;
             self.line_offsets.reset();
             self.column_offsets.reset();
         }
-        self.token.reset();
+        self.token.reset(self.chunk_buffer);
         self.node_allocator.reset();
         self.read();
     }
 
     pub inline fn advance_input_with_check(self: *@This()) void {
-        if (self.seek == root.read_chunk_size - 1) {
-            self.read_bytes += self.seek;
-            self.seek = 0;
-            self.read();
+        if (comptime root.procedures.indentation_syntax) {
+            if (self.seek == root.read_chunk_size - 1) {
+                self.read_bytes += self.seek;
+                self.seek = 0;
+                self.read();
+            }
+            self.seek +%= 1;
         }
-        self.seek +%= 1;
     }
 
     pub inline fn advance_input_without_check(self: *@This()) void {
-        self.seek += 1;
+        if (comptime root.procedures.indentation_syntax) {
+            self.seek += 1;
+        }
     }
 
     pub inline fn advance_input(self: *@This()) void {
-        // if (self.advance_input_mode == .with_check) {
-        //     self.advance_input_with_check();
-        // } else {
-        self.advance_input_without_check();
-        // }
+        if (comptime root.procedures.indentation_syntax) {
+            // if (self.advance_input_mode == .with_check) {
+            //     self.advance_input_with_check();
+            // } else {
+            self.advance_input_without_check();
+            // }
+        }
     }
 
     pub inline fn advance_lexer(self: *@This()) void {
@@ -198,9 +206,12 @@ pub const Context = struct {
             }
             self.column_offsets.append(1);
         }
-        self.token.append(self.chunk_buffer[self.seek]);
-
-        self.advance_input();
+        if (comptime root.procedures.indentation_syntax) {
+            self.token.append(self.chunk_buffer[self.seek]);
+            self.advance_input();
+        } else {
+            self.token.append_no_copy();
+        }
 
         if (comptime builtin.mode == .Debug) {
             if (self.verbosity > 1) {
@@ -213,7 +224,7 @@ pub const Context = struct {
         }
     }
 
-    pub fn head(self: *@This(), T: type, offset: Size) T {
+    pub fn head(self: *@This(), comptime T: type, offset: Size) T {
         const bytes_needed = comptime @divExact(@bitSizeOf(T), 8);
         const needed_len = offset + bytes_needed;
         while (self.token.len < needed_len) {
@@ -231,7 +242,7 @@ pub const Context = struct {
     }
 
     pub inline fn pos(self: *Self) Size {
-        return self.read_bytes + self.seek - self.token.len;
+        return self.read_bytes + self.token.head - self.token.len;
     }
 
     pub inline fn get_text_slice(self: *const Self, start: Size, length: Size) []const u8 {

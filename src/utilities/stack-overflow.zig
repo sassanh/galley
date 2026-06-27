@@ -81,6 +81,7 @@ pub fn protected_run(
         // We arrived here from the signal handler because the hardware MMU caught an overflow.
         var padding: [10]u8 = undefined;
         @memset(padding[0..10], ' ');
+        const pos = context.pos();
         std.debug.print("\x1b[35mStackOverflow at {d}:{d}:\x1b[0m\n" ++
             "Surounding text: \x1b[37m\"{f}\"\n" ++
             "                  {s}^\x1b[0m\n" ++
@@ -88,9 +89,9 @@ pub fn protected_run(
             if (comptime builtin.mode != .ReleaseFast) context.line else 0,
             if (comptime builtin.mode != .ReleaseFast) context.column else 0,
             root.string_utilities.fmtString(
-                context.chunk_buffer[context.seek - (context.seek % 10) .. context.seek + (10 - (context.seek % 10))],
+                context.chunk_buffer[pos - (pos % 10) .. pos + (10 - (pos % 10))],
             ),
-            padding[0..(context.seek % 10)],
+            padding[0..(pos % 10)],
             root.string_utilities.fmtString(context.token.items()),
         });
         return error.StackOverflow;

@@ -1,4 +1,3 @@
-# Written by Gemini 3.5 Flash (High)
 #!/usr/bin/env python3
 import argparse
 import os
@@ -279,32 +278,32 @@ def format_placeholder_card(name, width=34, no_color=False):
     return lines
 
 
-def run_benchmark_suite(name, parser_type, inputs, mode, gen_opts, args, target=None):
+def run_benchmark_suite(name, parser_type, inputs, mode, gen_opts, args):
     """
     Runs parser generator and compiles/runs benchmarks for all input files.
     """
-    if target is None:
-        target = f"{parser_type.lower()}-{name}"
-    # 1. Run parser generator command
-    gen_command_str = f"{GENERATOR_COMMAND}{name}"
-    cmd_args = (
-        shlex.split(gen_command_str) + ["--parser-type", parser_type] + list(gen_opts)
-    )
+    parser_types = [parser_type] if isinstance(parser_type, str) else parser_type
 
-    try:
-        subprocess.run(
-            cmd_args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            check=True,
+    # 1. Run parser generator command for all parser types
+    for p_type in parser_types:
+        gen_command_str = f"{GENERATOR_COMMAND}{name}"
+        cmd_args = (
+            shlex.split(gen_command_str) + ["--parser-type", p_type] + list(gen_opts)
         )
-    except subprocess.CalledProcessError as e:
-        print(
-            f"\n\033[31mError running parser generator command:\033[0m {' '.join(cmd_args)}"
-        )
-        print(f"\033[33mCommand Output:\033[0m\n{e.stdout}")
-        sys.exit(1)
+        try:
+            subprocess.run(
+                cmd_args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            print(
+                f"\n\033[31mError running parser generator command:\033[0m {' '.join(cmd_args)}"
+            )
+            print(f"\033[33mCommand Output:\033[0m\n{e.stdout}")
+            sys.exit(1)
 
     # Extract input size from gen_opts (defaults to None if not specified)
     input_size = None
@@ -326,44 +325,46 @@ def run_benchmark_suite(name, parser_type, inputs, mode, gen_opts, args, target=
             f"\n{GRAY}------------------------------------------------------------{RESET}"
         )
         print(
-            f"{MAGENTA}{name}{RESET} --parser-type {CYAN}{parser_type}{RESET} {BOLD}{' '.join(gen_opts)}{RESET}"
+            f"{MAGENTA}{name}{RESET} --parser-type {CYAN}{'/'.join(parser_types)}{RESET} {BOLD}{' '.join(gen_opts)}{RESET}"
         )
         print(
             f"{GRAY}------------------------------------------------------------{RESET}"
         )
         # Verification run in Debug mode
-        for input_file in inputs:
-            file_path = f"languages/{input_file}"
-            if input_size is not None and os.path.exists(file_path):
-                if os.path.getsize(file_path) >= (2**input_size):
-                    continue
+        for p_type in parser_types:
+            target = f"{p_type.lower()}-{name}"
+            for input_file in inputs:
+                file_path = input_file
+                if input_size is not None and os.path.exists(file_path):
+                    if os.path.getsize(file_path) >= (2**input_size):
+                        continue
 
-            cmd = [
-                "zig",
-                "build",
-                "-Doptimize=Debug",
-                target,
-                "--",
-                f"languages/{input_file}",
-                "--verbosity",
-                "0",
-                "--iterations",
-                "1",
-            ]
-            try:
-                subprocess.run(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    check=True,
-                )
-            except subprocess.CalledProcessError as e:
-                print(
-                    f"\n\033[31mError building/running {target} in Debug mode for {input_file}:\033[0m"
-                )
-                print(f"\033[33mCommand Output:\033[0m\n{e.stdout}")
-                sys.exit(1)
+                cmd = [
+                    "zig",
+                    "build",
+                    "-Doptimize=Debug",
+                    target,
+                    "--",
+                    input_file,
+                    "--verbosity",
+                    "0",
+                    "--iterations",
+                    "1",
+                ]
+                try:
+                    subprocess.run(
+                        cmd,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        text=True,
+                        check=True,
+                    )
+                except subprocess.CalledProcessError as e:
+                    print(
+                        f"\n\033[31mError building/running {target} in Debug mode for {input_file}:\033[0m"
+                    )
+                    print(f"\033[33mCommand Output:\033[0m\n{e.stdout}")
+                    sys.exit(1)
         return
 
     # ReleaseFast mode - print beautiful headers and cards grid
@@ -374,8 +375,14 @@ def run_benchmark_suite(name, parser_type, inputs, mode, gen_opts, args, target=
     # Determine the number of columns to use dynamically
     cols = get_terminal_cols(args.width, spacing=2)
 
-    for i in range(0, len(inputs), cols):
-        row_inputs = inputs[i : i + cols]
+    # Combine inputs and parser_types into grid items
+    grid_items = []
+    for input_file in inputs:
+        for p_type in parser_types:
+            grid_items.append((input_file, p_type))
+
+    for i in range(0, len(grid_items), cols):
+        row_items = grid_items[i : i + cols]
         row_cards = []
 
         # If interactive, pre-allocate space for the row
@@ -385,9 +392,10 @@ def run_benchmark_suite(name, parser_type, inputs, mode, gen_opts, args, target=
             sys.stdout.write("\033[8A\033[1G")
             sys.stdout.flush()
 
-        for col_idx, input_file in enumerate(row_inputs):
+        for col_idx, (input_file, p_type) in enumerate(row_items):
+            card_title = f"[{p_type}] {input_file}"
             # Check if file size >= 2^input_size
-            file_path = f"languages/{input_file}"
+            file_path = input_file
             is_too_large = False
             file_size = 0
             if os.path.exists(file_path):
@@ -406,14 +414,14 @@ def run_benchmark_suite(name, parser_type, inputs, mode, gen_opts, args, target=
             # Render placeholder only when this specific card starts running and is not skipped
             if is_interactive and not is_too_large:
                 placeholder = format_placeholder_card(
-                    input_file, width=args.width, no_color=args.no_color
+                    card_title, width=args.width, no_color=args.no_color
                 )
                 draw_card_in_row(placeholder, col_idx, width=args.width, spacing=2)
 
             if is_too_large:
                 msg = f"Size >= 2^{input_size}"
                 card_lines = format_card(
-                    input_file,
+                    card_title,
                     {},
                     width=args.width,
                     no_color=args.no_color,
@@ -425,13 +433,14 @@ def run_benchmark_suite(name, parser_type, inputs, mode, gen_opts, args, target=
                     row_cards.append(card_lines)
                 continue
 
+            target = f"{p_type.lower()}-{name}"
             cmd = [
                 "zig",
                 "build",
                 "-Doptimize=ReleaseFast",
                 target,
                 "--",
-                f"languages/{input_file}",
+                input_file,
                 "--verbosity",
                 "0",
                 "--iterations",
@@ -448,7 +457,7 @@ def run_benchmark_suite(name, parser_type, inputs, mode, gen_opts, args, target=
                 )
                 metrics = parse_zig_output(result.stdout)
                 card_lines = format_card(
-                    input_file, metrics, width=args.width, no_color=args.no_color
+                    card_title, metrics, width=args.width, no_color=args.no_color
                 )
 
                 if is_interactive:
@@ -460,7 +469,7 @@ def run_benchmark_suite(name, parser_type, inputs, mode, gen_opts, args, target=
                     sys.stdout.write("\033[8B\033[1G")
                     sys.stdout.flush()
                 print(
-                    f"\n\033[31mError running benchmark command for {input_file}:\033[0m"
+                    f"\n\033[31mError running benchmark command for {input_file} ({p_type}):\033[0m"
                 )
                 print(f"\033[33mCommand Output:\033[0m\n{e.stdout}")
                 sys.exit(1)
@@ -474,66 +483,76 @@ def run_benchmark_suite(name, parser_type, inputs, mode, gen_opts, args, target=
             print_grid(row_cards, cols=cols)
 
 
-def ll_grammar_benchmark(mode, gen_opts, args):
+def get_parser_types_for_language(lang_name, args):
+    lang_dir = os.path.join("languages", lang_name)
+    available = []
+    for p_type in ["LL", "LR"]:
+        grm_file = os.path.join(lang_dir, f"{p_type.lower()}.grm")
+        if os.path.exists(grm_file):
+            available.append(p_type)
+    if args.parser_type:
+        if args.parser_type in available:
+            return [args.parser_type]
+        else:
+            return []
+    return available
+
+
+def grammar_benchmark(mode, gen_opts, args):
     inputs = [
-        "grammar/ll.grm",
-        "grammar/lr.grm",
-        "json/ll.grm",
-        "test-ll/ll.grm",
-        "test-ll1/ll.grm",
+        "languages/grammar/ll.grm",
+        "languages/grammar/lr.grm",
+        "languages/json/ll.grm",
+        "languages/test-ll/ll.grm",
+        "languages/test-ll1/ll.grm",
     ]
-    run_benchmark_suite("grammar", "LL", inputs, mode, gen_opts, args)
+    parser_types = get_parser_types_for_language("grammar", args)
+    run_benchmark_suite("grammar", parser_types, inputs, mode, gen_opts, args)
 
 
-def lr_grammar_benchmark(mode, gen_opts, args):
+def json_benchmark(mode, gen_opts, args):
     inputs = [
-        "grammar/ll.grm",
-        "grammar/lr.grm",
-        "json/ll.grm",
-        "test-ll/ll.grm",
-        "test-ll1/ll.grm",
+        "languages/json/sample-code.json",
+        "languages/json/large-sample-code.json",
     ]
-    run_benchmark_suite("grammar", "LR", inputs, mode, gen_opts, args)
-
-
-def ll_json_benchmark(mode, gen_opts, args):
-    inputs = [
-        "json/sample-code.json",
-        "json/large-sample-code.json",
-    ]
-    run_benchmark_suite("json", "LL", inputs, mode, gen_opts, args)
-
-
-def lr_json_benchmark(mode, gen_opts, args):
-    inputs = [
-        "json/sample-code.json",
-        "json/large-sample-code.json",
-    ]
-    run_benchmark_suite("json", "LR", inputs, mode, gen_opts, args)
+    parser_types = get_parser_types_for_language("json", args)
+    run_benchmark_suite("json", parser_types, inputs, mode, gen_opts, args)
 
 
 def augmented_json_benchmark(mode, gen_opts, args):
     inputs = [
-        "json/sample-code.json",
-        "json/large-sample-code.json",
-        "augmented-json/large-sample-code-interweaved.json",
+        "languages/json/sample-code.json",
+        "languages/json/large-sample-code.json",
+        "languages/augmented-json/large-sample-code-interweaved.json",
     ]
-    run_benchmark_suite("json", "LL", inputs, mode, gen_opts, args)
+    parser_types = get_parser_types_for_language("augmented-json", args)
+    run_benchmark_suite("json", parser_types, inputs, mode, gen_opts, args)
 
 
 def test_ll_benchmark(mode, gen_opts, args):
     inputs = [
-        "test-ll/sample-code",
-        "test-ll/large-sample-code",
+        "languages/test-ll/sample-code",
+        "languages/test-ll/large-sample-code",
     ]
-    run_benchmark_suite("test-ll", "LL", inputs, mode, gen_opts, args)
+    parser_types = get_parser_types_for_language("test-ll", args)
+    run_benchmark_suite("test-ll", parser_types, inputs, mode, gen_opts, args)
 
 
 def test_ll1_benchmark(mode, gen_opts, args):
     inputs = [
-        "test-ll1/sample-code",
+        "languages/test-ll1/sample-code",
     ]
-    run_benchmark_suite("test-ll1", "LL", inputs, mode, gen_opts, args)
+    parser_types = get_parser_types_for_language("test-ll1", args)
+    run_benchmark_suite("test-ll1", parser_types, inputs, mode, gen_opts, args)
+
+
+def flat_json_benchmark(mode, gen_opts, args):
+    inputs = [
+        "languages/json/sample-code.json",
+        "languages/json/large-sample-code.json",
+    ]
+    parser_types = get_parser_types_for_language("flat_json", args)
+    run_benchmark_suite("flat_json", parser_types, inputs, mode, gen_opts, args)
 
 
 def run_all_modes(benchmark_fn, args):
@@ -541,9 +560,26 @@ def run_all_modes(benchmark_fn, args):
     Iterates through all feature modes, input sizes, and optimize modes.
     """
     ast_modes = ["--no-ast", "--no-procedures"]
+    if args.no_ast:
+        ast_modes = ["--no-ast"]
+    elif args.with_ast or args.no_procedures:
+        ast_modes = ["--no-procedures"]
+
     sizes = [16, 32]
+    if args.input_size is not None:
+        sizes = [args.input_size]
+
     term_asts = ["--no-ast-for-terminals", "--ast-for-terminals"]
+    if args.ast_for_terminals:
+        term_asts = ["--ast-for-terminals"]
+    elif args.no_ast_for_terminals:
+        term_asts = ["--no-ast-for-terminals"]
+
     modes = ["Debug", "ReleaseFast"]
+    if args.debug:
+        modes = ["Debug"]
+    elif args.release_fast:
+        modes = ["ReleaseFast"]
 
     for ast_mode in ast_modes:
         for size in sizes:
@@ -557,13 +593,10 @@ def run_all_modes(benchmark_fn, args):
 
 
 BENCHMARKS = {
-    "grammar": ll_grammar_benchmark,
-    "ll-grammar": ll_grammar_benchmark,
-    "lr-grammar": lr_grammar_benchmark,
-    "json": ll_json_benchmark,
-    "ll-json": ll_json_benchmark,
-    "lr-json": lr_json_benchmark,
+    "grammar": grammar_benchmark,
     "augmented-json": augmented_json_benchmark,
+    "json": json_benchmark,
+    "flat-json": flat_json_benchmark,
     "test-ll": test_ll_benchmark,
     "test-ll1": test_ll1_benchmark,
 }
@@ -586,14 +619,80 @@ def main():
     )
     parser.add_argument(
         "--benchmark",
-        choices=list(BENCHMARKS.keys()),
         default="grammar",
-        help="Benchmark to run (default: grammar)",
+        help="Benchmark to run (default: grammar). Accepts any language name; use --input to specify input files for languages not in the built-in list.",
+    )
+    parser.add_argument(
+        "--input",
+        nargs="+",
+        dest="inputs",
+        help="Input files to benchmark (paths relative to languages/)",
+    )
+    parser.add_argument(
+        "--parser-type",
+        choices=["LL", "LR", "GLR"],
+        help="Restrict benchmark to a specific parser type (LL, LR, GLR)",
+    )
+    parser.add_argument(
+        "--no-ast",
+        action="store_true",
+        help="Fix AST mode to --no-ast",
+    )
+    parser.add_argument(
+        "--with-ast",
+        action="store_true",
+        help="Fix AST mode to --no-procedures (AST enabled)",
+    )
+    parser.add_argument(
+        "--no-procedures",
+        action="store_true",
+        help="Fix AST mode to --no-procedures",
+    )
+    parser.add_argument(
+        "--input-size",
+        type=int,
+        choices=[16, 32],
+        help="Fix input size (16 or 32)",
+    )
+    parser.add_argument(
+        "--ast-for-terminals",
+        action="store_true",
+        help="Fix terminal AST mode to --ast-for-terminals",
+    )
+    parser.add_argument(
+        "--no-ast-for-terminals",
+        action="store_true",
+        help="Fix terminal AST mode to --no-ast-for-terminals",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Fix build optimize mode to Debug",
+    )
+    parser.add_argument(
+        "--release-fast",
+        action="store_true",
+        help="Fix build optimize mode to ReleaseFast",
     )
 
     args = parser.parse_args()
 
-    benchmark_fn = BENCHMARKS[args.benchmark]
+    if args.benchmark in BENCHMARKS and not args.inputs:
+        benchmark_fn = BENCHMARKS[args.benchmark]
+    else:
+        lang = args.benchmark
+        if not args.inputs:
+            parser.error(
+                f"--input is required for benchmark '{lang}' (not a built-in benchmark)"
+            )
+        inputs = list(args.inputs)
+
+        def benchmark_fn(mode, gen_opts, a, _lang=lang, _inputs=inputs):
+            parser_types = get_parser_types_for_language(_lang, a)
+            if not parser_types:
+                print(f"\033[31mNo parser types found for '{_lang}'\033[0m")
+                sys.exit(1)
+            run_benchmark_suite(_lang, parser_types, _inputs, mode, gen_opts, a)
 
     try:
         run_all_modes(benchmark_fn, args)

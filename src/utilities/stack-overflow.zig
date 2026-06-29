@@ -1,5 +1,5 @@
 const builtin = @import("builtin");
-const root = @import("root");
+const root = @import("galley");
 const std = @import("std");
 const data_structures = root.data_structures;
 
@@ -48,7 +48,11 @@ pub fn protected_run(
 
     // 2. Register the Signal Handler
     var sa: c.struct_sigaction = undefined;
-    sa.__sigaction_u.__sa_sigaction = segv_handler;
+    if (comptime builtin.target.os.tag.isDarwin()) {
+        sa.__sigaction_u.__sa_sigaction = segv_handler;
+    } else {
+        sa.__sigaction_handler.sa_sigaction = segv_handler;
+    }
     _ = c.sigemptyset(&sa.sa_mask);
 
     // SA_ONSTACK is mandatory: it forces the OS to use our alt_stack_mem

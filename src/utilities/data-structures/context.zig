@@ -1,8 +1,8 @@
 const builtin = @import("builtin");
-const root = @import("root");
+const root = @import("galley");
 const std = @import("std");
-const data_structures = @import("root").data_structures;
-const string_utilities = @import("root").string_utilities;
+const data_structures = root.data_structures;
+const string_utilities = root.string_utilities;
 
 fn findScalarLast(comptime T: type, slice: []const T, value: T) ?Context.Size {
     var i = slice.len;

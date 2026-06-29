@@ -57,9 +57,9 @@ class ParserGeneratorZigMixin(ParserGeneratorBaseMixin):
         return f"""\
 const builtin = @import("builtin");
 const std = @import("std");
-const procedures = @import("root").procedures;
-const data_structures = @import("root").data_structures;
-const string_utilities = @import("root").string_utilities;
+const procedures = @import("galley").procedures;
+const data_structures = @import("galley").data_structures;
+const string_utilities = @import("galley").string_utilities;
 
 pub const is_ast_enabled = {self.with_ast and "true" or "false"};
 pub const input_size_cap = u{self.input_size};

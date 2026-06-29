@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ${{ contains(github.server_url, 'github') && 'ubuntu-latest' || 'codeberg-medium' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Zig
+        run: |
+          URL=$(curl -s https://ziglang.org/download/index.json | jq -r '."0.16.0"."x86_64-linux".tarball')
+          curl -L "$URL" -o zig.tar.xz
+          tar -xf zig.tar.xz
+          echo "$PWD/zig-x86_64-linux-0.16.0" >> $GITHUB_PATH
+
+      - name: Run unit tests
+        run: zig build test --summary all
+
+      - name: Run benchmarks
+        run: uv run --python 3.13 python3 benchmark.py --validate-only

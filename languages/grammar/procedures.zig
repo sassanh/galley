@@ -1,5 +1,5 @@
 const std = @import("std");
-const data_structures = @import("root").data_structures;
+const data_structures = @import("galley").data_structures;
 
 pub const indentation_syntax = false;
 pub const Payload = struct { data: []const u8 = "" };

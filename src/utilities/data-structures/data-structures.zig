@@ -1,7 +1,7 @@
 const std = @import("std");
 const builtin = @import("builtin");
-const root = @import("root");
-const string_utilities = @import("root").string_utilities;
+const root = @import("galley");
+const string_utilities = root.string_utilities;
 
 pub const Payload = root.procedures.Payload;
 pub const ASTNode = @import("astnode.zig").ASTNode(Payload);

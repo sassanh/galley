@@ -1,5 +1,5 @@
 const builtin = @import("builtin");
-const root = @import("root");
+const root = @import("galley");
 const std = @import("std");
 const Context = @import("context.zig").Context;
 

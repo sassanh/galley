@@ -1,8 +1,8 @@
 const std = @import("std");
-const ProcedureArguments = @import("root").data_structures.ProcedureArguments;
-const ASTNode = @import("root").data_structures.ASTNode;
-const string_utilities = @import("root").string_utilities;
-const parse_table = @import("root").parse_table;
+const ProcedureArguments = @import("galley").data_structures.ProcedureArguments;
+const ASTNode = @import("galley").data_structures.ASTNode;
+const string_utilities = @import("galley").string_utilities;
+const parse_table = @import("galley").parse_table;
 
 const control_characters_uppper_bound = 4;
 

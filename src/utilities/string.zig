@@ -1,7 +1,8 @@
 const std = @import("std");
-const parser = @import("root").parser;
-const ASTNode = @import("root").data_structures.ASTNode;
-const Context = @import("root").data_structures.Context;
+const root = @import("galley");
+const parser = root.parser;
+const ASTNode = root.data_structures.ASTNode;
+const Context = root.data_structures.Context;
 
 const StringSliceFormatter = struct {
     slice: []const []const u8,

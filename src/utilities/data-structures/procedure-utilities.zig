@@ -1,5 +1,6 @@
 const std = @import("std");
-const data_structures = @import("root").data_structures;
+const root = @import("galley");
+const data_structures = root.data_structures;
 
 pub const ProcedureArguments = struct {
     test "simple test" {

@@ -7,7 +7,7 @@ pub const string_utilities = @import("utilities/string.zig");
 pub const stack_overflow_utilities = @import("utilities/stack-overflow.zig");
 pub const data_structures = @import("utilities/data-structures/data-structures.zig");
 pub const read_chunk_size = std.math.maxInt(std.math.Min(data_structures.Context.Size, u28));
-pub const preallocated_nodes = if (parser.is_ast_enabled) (std.math.maxInt(std.math.Min(data_structures.Context.Size, u28)) - 1) else 0;
+pub const preallocated_nodes = if (parser.is_ast_enabled) (std.math.maxInt(std.math.Min(data_structures.Context.Size, u27)) - 1) else 0;
 
 fn printHelp() void {
     std.debug.print("\nusage: parser_builder [program_path]\n", .{});
@@ -133,4 +133,8 @@ test "simple test" {
     defer list.deinit(gpa);
     try list.append(gpa, 42);
     try std.testing.expectEqual(@as(i32, 42), list.pop());
+}
+
+test {
+    _ = @import("utilities/data-structures/astnode.zig");
 }

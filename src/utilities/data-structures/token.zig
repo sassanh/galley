@@ -1,7 +1,7 @@
 const builtin = @import("builtin");
 const std = @import("std");
 const Context = @import("context.zig").Context;
-const root = @import("root");
+const root = @import("galley");
 
 pub const Token = struct {
     pub const max_length = 65500;

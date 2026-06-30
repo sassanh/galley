@@ -26,7 +26,6 @@ Galley ships with several ready-to-use grammar definitions located in the `langu
 The standard RFC 8259 JSON implementation. It supports full recursive object and array structures, floating-point numbers, unicode escape sequences, and string content literals.
 - **Parser Engines:** Both `ll.grm` and `lr.grm` are provided.
 - **Hooks:** Implements `@drop_children`, `@drop_self`, and `@replace_with_children` in `procedures.zig` to keep memory allocations minimal during AST generation.
-- **Test Inputs:** Contains `samples/code-01.json` and `samples/code-02.json`.
 
 ### Augmented JSON (`languages/augmented-json`)
 An extended JSON variant designed to test extreme recursion depths and stress-test the parser's stack overflow recovery mechanisms. It introduces special grouping syntax (`*(...)` and `(...)`) that allows deeply nested structures without exceeding memory limits.
@@ -40,12 +39,10 @@ A variant of the standard JSON grammar designed to parse full, recursive JSON bu
 ### Lisp (`languages/lisp`)
 A Lisp grammar covering lists, symbols, numbers, strings, reader macros, comments, vectors, arrays, and multiple top-level forms.
 - **Parser Engines:** `ll.grm` is provided.
-- **Test Inputs:** Contains `samples/code-01.lisp` and `samples/code-02.lisp`.
 
 ### Lua (`languages/lua`)
 A compact Lua subset grammar that demonstrates keyword-led statements, function declarations, returns, function-call expressions, integer literals, strings, and keyed table constructors.
 - **Parser Engines:** `ll.grm` is provided.
-- **Test Inputs:** Contains `samples/code-01.lua`.
 
 ### Grammar Parser (`languages/grammar`)
 The self-hosting definition of Galley's own `.grm` syntax! This language defines the exact structure of rule definitions, alternatives (`|`), variable symbols, quoted literals, and `@` annotations used across the compiler.

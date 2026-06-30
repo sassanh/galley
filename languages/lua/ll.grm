@@ -1,119 +1,98 @@
 Start
-| OptionalBlank Statements
+| Items
 
-Statements
-| Statement StatementsTail
+Items
+| Item Items
+| 
 
-StatementsTail
-| RequiredBlank StatementsAfterBlank
-|
-
-StatementsAfterBlank
-| Statement StatementsTail
-|
-
-Statement
-| LocalStatement
-| FunctionStatement
-| ReturnStatement
-
-LocalStatement
-| "local" RequiredBlank Identifier OptionalBlank "=" OptionalBlank Expression
-
-FunctionStatement
-| "function" RequiredBlank Identifier OptionalBlank "(" Parameters ")" Block "end"
-
-ReturnStatement
-| "return" RequiredBlank Expression
-
-Block
-| RequiredBlank Statements
-
-Parameters
-| Identifier ParametersTail
-|
-
-ParametersTail
-| OptionalBlank "," OptionalBlank Identifier ParametersTail
-|
-
-Expression
-| Identifier IdentifierExpressionTail
-| Table
-| Number
+Item
 | String
+| LongString
+| DashItem
+| "{" BraceItems "}"
+| "(" ParenItems ")"
+| "[" BracketAfter
+| character^'"^"'"^"-"^"{"^"}"^"("^")"^"["^"]"
 
-IdentifierExpressionTail
-| "(" Arguments ")"
-|
+DashItem
+| "-" DashAfter
 
-Arguments
-| Expression ArgumentsTail
-|
+DashAfter
+| "-[[" _LongStringContent
+| "-" _LineCommentTail
+| character^"-"
 
-ArgumentsTail
-| "," OptionalBlank ArgumentsAfterComma
-|
+BraceItems
+| BraceItem BraceItems
+| 
 
-ArgumentsAfterComma
-| Expression ArgumentsTail
-|
+BraceItem
+| String
+| LongString
+| DashItem
+| "{" BraceItems "}"
+| "(" ParenItems ")"
+| "[" BracketAfter
+| character^'"^"'"^"-"^"{"^"}"^"("^")"^"["^"]"
 
-Table
-| "{" OptionalBlank Fields "}"
+ParenItems
+| ParenItem ParenItems
+| 
 
-Fields
-| Field FieldsTail
-|
+ParenItem
+| String
+| LongString
+| DashItem
+| "{" BraceItems "}"
+| "(" ParenItems ")"
+| "[" BracketAfter
+| character^'"^"'"^"-"^"{"^"}"^"("^")"^"["^"]"
 
-FieldsTail
-| "," OptionalBlank FieldsAfterComma
-|
+BracketAfter
+| "[" _LongStringContent
+| BracketItems "]"
 
-FieldsAfterComma
-| Field FieldsTail
-|
+BracketItems
+| BracketItem BracketItems
+| 
 
-Field
-| Identifier OptionalBlank "=" OptionalBlank Expression OptionalBlank
-
-Identifier
-| letter _IdentifierTail
-
-_IdentifierTail
-| letter _IdentifierTail
-| digit _IdentifierTail
-| "_" _IdentifierTail
-|
-
-Number
-| "-" PositiveNumber
-| PositiveNumber
-
-PositiveNumber
-| digit _DigitTail
-
-_DigitTail
-| digit _DigitTail
-|
+BracketItem
+| String
+| LongString
+| DashItem
+| "{" BraceItems "}"
+| "(" ParenItems ")"
+| character^'"^"'"^"-"^"{"^"}"^"("^")"^"["^"]"
 
 String
-| '" _StringContent '"
+| '" _DoubleStringContent '"
+| "'" _SingleStringContent "'"
 
-_StringContent
-| character^'" _StringContent
-|
+_DoubleStringContent
+| "\\" character _DoubleStringContent
+| character^'"^"\\" _DoubleStringContent
+| new_line _DoubleStringContent
+| 
 
-OptionalBlank
-| space _OptionalBlankTail
-| new_line _OptionalBlankTail
-|
+_SingleStringContent
+| "\\" character _SingleStringContent
+| character^"'"^"\\" _SingleStringContent
+| new_line _SingleStringContent
+| 
 
-RequiredBlank
-| space _OptionalBlankTail
-| new_line _OptionalBlankTail
+LongString
+| "[[" _LongStringContent
 
-_OptionalBlankTail
-| space _OptionalBlankTail
-| new_line _OptionalBlankTail
-|
+_LongStringContent
+| "]" _LongStringAfterBracket
+| character^"]" _LongStringContent
+| new_line _LongStringContent
+
+_LongStringAfterBracket
+| "]"
+| character^"]" _LongStringContent
+| new_line _LongStringContent
+
+_LineCommentTail
+| new_line
+| character^"\n" _LineCommentTail

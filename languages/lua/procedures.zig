@@ -7,5 +7,5 @@ pub const Payload = struct {};
 
 pub fn reduction_Start(args: *ProcedureArguments) void {
     if (args.context.verbosity > 0)
-        std.debug.print("Parsed Lisp successfully.\n", .{});
+        std.debug.print("Parsed Lua successfully.\n", .{});
 }

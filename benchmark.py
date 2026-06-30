@@ -348,11 +348,17 @@ def write_result_to_file(filepath, content):
         f.write(content)
 
 
-def run_benchmark_suite(name, parser_type, inputs, gen_opts, args):
+def run_benchmark_suite(name, gen_opts, args, inputs=None):
     """
     Runs parser generator and compiles/runs benchmarks for all input files.
     """
-    parser_types = [parser_type] if isinstance(parser_type, str) else parser_type
+    parser_types = get_parser_types_for_language(name, args)
+    if not parser_types:
+        print(f"\033[31mNo parser types found for '{name}'\033[0m")
+        sys.exit(1)
+
+    if inputs is None:
+        inputs = sample_inputs(name)
 
     # Extract AST mode
     # Extract AST mode
@@ -861,6 +867,18 @@ def get_parser_types_for_language(lang_name, args):
     return available
 
 
+def sample_inputs(lang_name):
+    samples_dir = os.path.join("languages", lang_name, "samples")
+    if not os.path.isdir(samples_dir):
+        return []
+
+    return [
+        os.path.join(samples_dir, name)
+        for name in sorted(os.listdir(samples_dir))
+        if os.path.isfile(os.path.join(samples_dir, name))
+    ]
+
+
 def grammar_benchmark(gen_opts, args):
     inputs = [
         "languages/grammar/ll.grm",
@@ -869,70 +887,37 @@ def grammar_benchmark(gen_opts, args):
         "languages/test-ll/ll.grm",
         "languages/test-ll1/ll.grm",
     ]
-    parser_types = get_parser_types_for_language("grammar", args)
-    run_benchmark_suite("grammar", parser_types, inputs, gen_opts, args)
+    run_benchmark_suite("grammar", gen_opts, args, inputs)
 
 
 def json_benchmark(gen_opts, args):
-    inputs = [
-        "languages/json/samples/code-01.json",
-        "languages/json/samples/code-02.json",
-    ]
-    parser_types = get_parser_types_for_language("json", args)
-    run_benchmark_suite("json", parser_types, inputs, gen_opts, args)
+    run_benchmark_suite("json", gen_opts, args)
 
 
 def augmented_json_benchmark(gen_opts, args):
-    inputs = [
-        "languages/json/samples/code-01.json",
-        "languages/json/samples/code-02.json",
-        "languages/augmented-json/samples/code-01.json",
-    ]
-    parser_types = get_parser_types_for_language("augmented-json", args)
-    run_benchmark_suite("augmented-json", parser_types, inputs, gen_opts, args)
+    inputs = sample_inputs("json") + sample_inputs("augmented-json")
+    run_benchmark_suite("augmented-json", gen_opts, args, inputs)
 
 
 def test_ll_benchmark(gen_opts, args):
-    inputs = [
-        "languages/test-ll/samples/code-01",
-        "languages/test-ll/samples/code-02",
-    ]
-    parser_types = get_parser_types_for_language("test-ll", args)
-    run_benchmark_suite("test-ll", parser_types, inputs, gen_opts, args)
+    run_benchmark_suite("test-ll", gen_opts, args)
 
 
 def test_ll1_benchmark(gen_opts, args):
-    inputs = [
-        "languages/test-ll1/samples/code-01",
-    ]
-    parser_types = get_parser_types_for_language("test-ll1", args)
-    run_benchmark_suite("test-ll1", parser_types, inputs, gen_opts, args)
+    run_benchmark_suite("test-ll1", gen_opts, args)
 
 
 def flat_json_benchmark(gen_opts, args):
-    inputs = [
-        "languages/json/samples/code-01.json",
-        "languages/json/samples/code-02.json",
-    ]
-    parser_types = get_parser_types_for_language("flat_json", args)
-    run_benchmark_suite("flat_json", parser_types, inputs, gen_opts, args)
+    inputs = sample_inputs("json")
+    run_benchmark_suite("flat_json", gen_opts, args, inputs)
 
 
 def lisp_benchmark(gen_opts, args):
-    inputs = [
-        "languages/lisp/samples/code-01.lisp",
-        "languages/lisp/samples/code-02.lisp",
-    ]
-    parser_types = get_parser_types_for_language("lisp", args)
-    run_benchmark_suite("lisp", parser_types, inputs, gen_opts, args)
+    run_benchmark_suite("lisp", gen_opts, args)
 
 
 def lua_benchmark(gen_opts, args):
-    inputs = [
-        "languages/lua/samples/code-01.lua",
-    ]
-    parser_types = get_parser_types_for_language("lua", args)
-    run_benchmark_suite("lua", parser_types, inputs, gen_opts, args)
+    run_benchmark_suite("lua", gen_opts, args)
 
 
 def run_all_modes(benchmark_fn, args):
@@ -1068,11 +1053,7 @@ def main():
             inputs = list(args.inputs)
 
             def benchmark_fn(gen_opts, a, _lang=lang, _inputs=inputs):
-                parser_types = get_parser_types_for_language(_lang, a)
-                if not parser_types:
-                    print(f"\033[31mNo parser types found for '{_lang}'\033[0m")
-                    sys.exit(1)
-                run_benchmark_suite(_lang, parser_types, _inputs, gen_opts, a)
+                run_benchmark_suite(_lang, gen_opts, a, _inputs)
 
         try:
             run_all_modes(benchmark_fn, args)

@@ -16,7 +16,7 @@ Galley benchmarks are meant to show both parser throughput and grammar breadth. 
 | Grammar          | What it exercises                                                                  | Parsers |
 | ---------------- | ---------------------------------------------------------------------------------- | ------- |
 | JSON / Flat JSON | Recursive data, strings, numbers, arrays, objects, third-party comparison baseline | LL + LR |
-| Lisp             | Nested S-expressions, symbols, strings, integers, multiple top-level forms         | LL      |
+| Lisp             | Lists, symbols, numbers, strings, reader macros, comments, vectors, arrays         | LL      |
 | Lua              | Keyword-led statements, functions, calls, returns, keyed table constructors        | LL      |
 | Galley Grammar   | The `.grm` language used to define Galley grammars                                 | LL + LR |
 
@@ -51,7 +51,7 @@ specification with no JSON-specific optimisations.
 
 ### Parser Generators & Tools — Head-to-Head
 
-Galley is measured on `languages/json/large-sample-code.json` (flat_json grammar, best configuration per mode). Third-party tools on `third_party/parser-benchmark/large_dataset.json` (~50 MB). Inputs differ; this is a directional comparison.
+Galley is measured on `languages/json/samples/code-02.json` (flat_json grammar, best configuration per mode). Third-party tools on `third_party/parser-benchmark/large_dataset.json` (~50 MB). Inputs differ; this is a directional comparison.
 
 | Parser / Mode              | Category           | Throughput |
 | -------------------------- | ------------------ | ---------- |
@@ -135,7 +135,7 @@ _AST = build syntax tree · Term. = include terminal nodes in tree · Limit = to
 
 ## Lisp
 
-_A compact S-expression grammar for Lisp-like programs. It exercises nested lists, symbols, integer literals, strings, and multiple top-level forms while remaining small enough to serve as a readable programming-language example._
+_A Lisp grammar that exercises lists, symbols, numbers, strings, reader macros, comments, vectors, arrays, and multiple top-level forms._
 
 _AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
 

@@ -29,10 +29,10 @@ The fastest path is to start with an example grammar that already ships with the
 uv run --project initial-parser-generator initial-parser-generator/main.py --language languages/json --parser-type LL
 
 # 2. Build and run it with release optimization for maximum throughput
-zig build -Doptimize=ReleaseFast ll-json -- languages/json/sample-code.json
+zig build -Doptimize=ReleaseFast ll-json -- languages/json/samples/code-01.json
 ```
 
-That's it — `languages/json/sample-code.json` parses at hundreds of megabytes per second.
+That's it — `languages/json/samples/code-01.json` parses at hundreds of megabytes per second.
 
 ### Try the LR parser too
 
@@ -41,7 +41,7 @@ That's it — `languages/json/sample-code.json` parses at hundreds of megabytes 
 uv run --project initial-parser-generator initial-parser-generator/main.py --language languages/json --parser-type LR
 
 # 2. Build and run it
-zig build -Doptimize=ReleaseFast lr-json -- languages/json/sample-code.json
+zig build -Doptimize=ReleaseFast lr-json -- languages/json/samples/code-01.json
 ```
 
 ---

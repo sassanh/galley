@@ -24,7 +24,7 @@ To execute a benchmark run, pass the target file along with the `-r` (`--iterati
 
 ```sh
 # Run 100 benchmark iterations with 10 warmup passes on large JSON input
-zig build -Doptimize=ReleaseFast ll-flat_json -- -r 100 -w 10 languages/json/large-sample-code.json
+zig build -Doptimize=ReleaseFast ll-flat_json -- -r 100 -w 10 languages/json/samples/code-02.json
 ```
 
 ---

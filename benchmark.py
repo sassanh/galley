@@ -719,7 +719,9 @@ def run_benchmark_suite(name, parser_type, inputs, gen_opts, args):
                             no_color=args.no_color,
                             status="Running...",
                         )
-                        draw_card_in_row(placeholder_run, col_idx, width=args.width, spacing=2)
+                        draw_card_in_row(
+                            placeholder_run, col_idx, width=args.width, spacing=2
+                        )
 
                     # Run second time for 1.0 second
                     run_cmd_2 = [
@@ -873,8 +875,8 @@ def grammar_benchmark(gen_opts, args):
 
 def json_benchmark(gen_opts, args):
     inputs = [
-        "languages/json/sample-code.json",
-        "languages/json/large-sample-code.json",
+        "languages/json/samples/code-01.json",
+        "languages/json/samples/code-02.json",
     ]
     parser_types = get_parser_types_for_language("json", args)
     run_benchmark_suite("json", parser_types, inputs, gen_opts, args)
@@ -882,9 +884,9 @@ def json_benchmark(gen_opts, args):
 
 def augmented_json_benchmark(gen_opts, args):
     inputs = [
-        "languages/json/sample-code.json",
-        "languages/json/large-sample-code.json",
-        "languages/augmented-json/large-sample-code-interweaved.json",
+        "languages/json/samples/code-01.json",
+        "languages/json/samples/code-02.json",
+        "languages/augmented-json/samples/code-01.json",
     ]
     parser_types = get_parser_types_for_language("augmented-json", args)
     run_benchmark_suite("augmented-json", parser_types, inputs, gen_opts, args)
@@ -892,8 +894,8 @@ def augmented_json_benchmark(gen_opts, args):
 
 def test_ll_benchmark(gen_opts, args):
     inputs = [
-        "languages/test-ll/sample-code",
-        "languages/test-ll/large-sample-code",
+        "languages/test-ll/samples/code-01",
+        "languages/test-ll/samples/code-02",
     ]
     parser_types = get_parser_types_for_language("test-ll", args)
     run_benchmark_suite("test-ll", parser_types, inputs, gen_opts, args)
@@ -901,7 +903,7 @@ def test_ll_benchmark(gen_opts, args):
 
 def test_ll1_benchmark(gen_opts, args):
     inputs = [
-        "languages/test-ll1/sample-code",
+        "languages/test-ll1/samples/code-01",
     ]
     parser_types = get_parser_types_for_language("test-ll1", args)
     run_benchmark_suite("test-ll1", parser_types, inputs, gen_opts, args)
@@ -909,8 +911,8 @@ def test_ll1_benchmark(gen_opts, args):
 
 def flat_json_benchmark(gen_opts, args):
     inputs = [
-        "languages/json/sample-code.json",
-        "languages/json/large-sample-code.json",
+        "languages/json/samples/code-01.json",
+        "languages/json/samples/code-02.json",
     ]
     parser_types = get_parser_types_for_language("flat_json", args)
     run_benchmark_suite("flat_json", parser_types, inputs, gen_opts, args)
@@ -918,7 +920,8 @@ def flat_json_benchmark(gen_opts, args):
 
 def lisp_benchmark(gen_opts, args):
     inputs = [
-        "languages/lisp/sample-code.lisp",
+        "languages/lisp/samples/code-01.lisp",
+        "languages/lisp/samples/code-02.lisp",
     ]
     parser_types = get_parser_types_for_language("lisp", args)
     run_benchmark_suite("lisp", parser_types, inputs, gen_opts, args)
@@ -926,7 +929,7 @@ def lisp_benchmark(gen_opts, args):
 
 def lua_benchmark(gen_opts, args):
     inputs = [
-        "languages/lua/sample-code.lua",
+        "languages/lua/samples/code-01.lua",
     ]
     parser_types = get_parser_types_for_language("lua", args)
     run_benchmark_suite("lua", parser_types, inputs, gen_opts, args)

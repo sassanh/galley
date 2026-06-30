@@ -44,7 +44,7 @@ For a local, up-to-date comparison against third-party parsers see [BENCHMARKS.m
 uv run --project initial-parser-generator initial-parser-generator/main.py --language languages/json --parser-type LL
 
 # 2. Build and run the parser in ReleaseFast mode
-zig build -Doptimize=ReleaseFast ll-flat_json -- languages/json/sample-code.json
+zig build -Doptimize=ReleaseFast ll-flat_json -- languages/json/samples/code-01.json
 ```
 
 ---

@@ -42,7 +42,7 @@ class BenchmarkFile:
     path: str
     source: str          # "galley" or "third_party"
     language: str        # "json", "grammar", "augmented-json", etc.
-    input_file: str      # e.g. "languages/json/sample-code.json"
+    input_file: str      # e.g. "languages/json/samples/code-01.json"
     ast_mode: str        # "no-ast", "no-procedures", "" (third_party)
     size_limit: str      # "size_16", "size_32", "" (third_party)
     terminal_ast: str    # "ast-for-terminals", "no-ast-for-terminals", ""
@@ -402,7 +402,7 @@ specification with no JSON-specific optimisations.
     # ── Parser generators comparison (main table) ──────────────────────────
     lines.append("### Parser Generators & Tools — Head-to-Head\n")
     lines.append(
-        "Galley is measured on `languages/json/large-sample-code.json` (flat_json grammar, "
+        "Galley is measured on `languages/json/samples/code-02.json` (flat_json grammar, "
         "best configuration per mode). Third-party tools on "
         "`third_party/parser-benchmark/large_dataset.json` (~50 MB). "
         "Inputs differ; this is a directional comparison.\n"
@@ -467,9 +467,8 @@ GRAMMAR_DESCRIPTIONS: Dict[str, str] = {
         "indentation-sensitive constructs."
     ),
     "lisp": (
-        "A compact S-expression grammar for Lisp-like programs. It exercises nested lists, "
-        "symbols, integer literals, strings, and multiple top-level forms while remaining "
-        "small enough to serve as a readable programming-language example."
+        "A Lisp grammar that exercises lists, symbols, numbers, strings, reader macros, "
+        "comments, vectors, arrays, and multiple top-level forms."
     ),
     "lua": (
         "A compact Lua subset grammar. It exercises keyword-led statements, function "

@@ -62,15 +62,15 @@ zig build -Doptimize=ReleaseFast ll-json -- [OPTIONS] <FILE>
 ### Standard Production Generation & Run
 ```sh
 uv run --project initial-parser-generator initial-parser-generator/main.py --language languages/json --parser-type LL
-zig build -Doptimize=ReleaseFast ll-json -- languages/json/sample-code.json
+zig build -Doptimize=ReleaseFast ll-json -- languages/json/samples/code-01.json
 ```
 
 ### High-Precision Benchmarking Loop (100 Iterations with 10 Warmups)
 ```sh
-zig build -Doptimize=ReleaseFast ll-json -- -r 100 -w 10 languages/json/large-sample-code.json
+zig build -Doptimize=ReleaseFast ll-json -- -r 100 -w 10 languages/json/samples/code-02.json
 ```
 
 ### AST Debugging & Inspection
 ```sh
-zig build ll-json -- -v 1 languages/json/sample-code.json
+zig build ll-json -- -v 1 languages/json/samples/code-01.json
 ```

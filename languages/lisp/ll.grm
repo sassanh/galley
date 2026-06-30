@@ -3,77 +3,383 @@ Start
 
 Forms
 | Form FormsTail
+| 
 
 FormsTail
 | RequiredBlank FormsAfterBlank
-|
+| 
 
 FormsAfterBlank
 | Form FormsTail
-|
+| 
 
 Form
+| Abbreviation
 | List
-| Atom
+| HashForm
+| String
+| EscapedSymbol
+| DecimalNumber
+| Symbol
+
+# -- Quote abbreviations (read macros) ---------------------
+
+Abbreviation
+| "'" OptionalBlank Form
+| "`" OptionalBlank Form
+| "," UnquoteSuffix OptionalBlank Form
+
+UnquoteSuffix
+| "@"
+| 
+
+# -- Lists: proper and dotted pairs ------------------------
 
 List
-| "(" OptionalBlank ListItems ")"
+| "(" OptionalBlank ListBody ")"
 
-ListItems
-| Form ListItemsTail
-|
+ListBody
+| Form ListBodyTail
+| 
 
-ListItemsTail
-| RequiredBlank ListItemsAfterBlank
-|
+ListBodyTail
+| RequiredBlank ListBodyAfterBlank
+| 
 
-ListItemsAfterBlank
-| Form ListItemsTail
-|
+ListBodyAfterBlank
+| "." RequiredBlank Form
+| Form ListBodyTail
+| 
 
-Atom
-| Symbol
-| Number
-| String
+# -- Hash-prefixed forms -----------------------------------
 
-Symbol
-| letter _SymbolTail
+# Booleans, characters, vectors, bytevectors, radix numbers,
+# datum comments (#;), and block comments (#| ... |#).
 
-_SymbolTail
-| letter _SymbolTail
-| digit _SymbolTail
-| "-" _SymbolTail
-| "_" _SymbolTail
-|
+HashForm
+| "#t" BooleanTrueTail
+| "#f" BooleanFalseTail
+| "#\\" CharacterContent
+| "#(" OptionalBlank VectorBody ")"
+| "#u8(" OptionalBlank BytevectorBody ")"
+| "#*" BitVectorBody
+| "#b" BinaryDigit BinaryDigitTail
+| "#o" OctalDigit OctalDigitTail
+| "#x" HexDigit HexDigitTail
+| "#" digit _DigitTail HashNumberDispatch
+| "#;" OptionalBlank Form
+| "#|" BlockCommentBody
+| "#:" _SymbolInitial _SymbolTail
+| "#'" OptionalBlank Form
+| "#." OptionalBlank Form
+| "#+" OptionalBlank Form RequiredBlank Form
+| "#-" OptionalBlank Form RequiredBlank Form
+| "#P" String
+| "#p" String
+| "#S" List
+| "#s" List
+| "#C" List
+| "#c" List
 
-Number
-| "-" PositiveNumber
-| PositiveNumber
+BooleanTrueTail
+| "rue"
+| 
 
-PositiveNumber
+BooleanFalseTail
+| "alse"
+| 
+
+# Character literals: #\a  #\space  #\newline  #\0  etc.
+# Named characters (space, newline, tab ...) are matched by
+# letter _CharNameTail, which consumes the full name.
+CharacterContent
+| letter _CharNameTail
+| digit
+| space
+| "("
+| ")"
+| "["
+| "]"
+| "{"
+| "}"
+| "+"
+| "-"
+| "*"
+| "/"
+| "="
+| "<"
+| ">"
+| "!"
+| "?"
+| ":"
+| "$"
+| "%"
+| "&"
+| "^"
+| "_"
+| "~"
+| "@"
+| "#"
+| "\\"
+| "."
+| ","
+| ";"
+| "`"
+| "'"
+| "|"
+| '"
+
+_CharNameTail
+| letter _CharNameTail
+| 
+
+VectorBody
+| Form VectorBodyTail
+| 
+
+VectorBodyTail
+| RequiredBlank VectorBodyAfterBlank
+| 
+
+VectorBodyAfterBlank
+| Form VectorBodyTail
+| 
+
+BytevectorBody
+| BytevectorByte BytevectorBodyTail
+| 
+
+BytevectorBodyTail
+| RequiredBlank BytevectorBodyAfterBlank
+| 
+
+BytevectorBodyAfterBlank
+| BytevectorByte BytevectorBodyTail
+| 
+
+BytevectorByte
 | digit _DigitTail
 
-_DigitTail
-| digit _DigitTail
-|
+BitVectorBody
+| BinaryDigit BitVectorBody
+| 
+
+HashNumberDispatch
+| RadixMarker RadixDigit RadixDigitTail
+| ArrayMarker List
+
+RadixMarker
+| "r"
+| "R"
+
+ArrayMarker
+| "a"
+| "A"
+
+RadixDigit
+| digit
+| letter
+
+RadixDigitTail
+| RadixDigit RadixDigitTail
+| 
+
+BinaryDigit
+| "0"
+| "1"
+
+BinaryDigitTail
+| BinaryDigit BinaryDigitTail
+| 
+
+OctalDigit
+| "0"
+| "1"
+| "2"
+| "3"
+| "4"
+| "5"
+| "6"
+| "7"
+
+OctalDigitTail
+| OctalDigit OctalDigitTail
+| 
+
+HexDigit
+| digit
+| "a"
+| "b"
+| "c"
+| "d"
+| "e"
+| "f"
+| "A"
+| "B"
+| "C"
+| "D"
+| "E"
+| "F"
+
+HexDigitTail
+| HexDigit HexDigitTail
+| 
+
+# Block comments #| ... |# (Common Lisp style: non-nesting)
+BlockCommentBody
+| character^"|" BlockCommentBody
+| new_line BlockCommentBody
+| "|" BlockCommentAfterPipe
+
+BlockCommentAfterPipe
+| "#"
+| character^"#" BlockCommentBody
+| new_line BlockCommentBody
+| "|" BlockCommentAfterPipe
+
+# -- Strings with escape sequences -------------------------
 
 String
 | '" _StringContent '"
 
 _StringContent
-| character^'" _StringContent
+| "\\" _EscapeSequence _StringContent
+| character^'"^"\\" _StringContent
+| new_line _StringContent
 |
+
+_EscapeSequence
+| '"
+| "\\"
+| "n"
+| "t"
+| "r"
+| "b"
+| "a"
+| "0"
+| "x" HexDigit HexDigitTail ";"
+
+# -- Escaped symbols ---------------------------------------
+
+EscapedSymbol
+| "|" _EscapedSymbolContent "|" _SymbolTail
+
+_EscapedSymbolContent
+| "\\" character _EscapedSymbolContent
+| character^"|"^"\\" _EscapedSymbolContent
+| 
+
+# -- Numbers -----------------------------------------------
+
+# Unsigned decimal integers, floats (3.14, 1e5), and rationals (1/3).
+# Signed numbers are expressed as (- 1) or (negate x) by convention.
+# Radix numbers (#b #o #x) are in HashForm. + and - are symbols.
+
+DecimalNumber
+| digit _DigitTail DecimalSuffix
+
+_DigitTail
+| digit _DigitTail
+| 
+
+DecimalSuffix
+| "/" digit _DigitTail
+| "." digit _DigitTail ExponentTail
+| ExponentTail
+| "+" _SymbolTail
+| "-" _SymbolTail
+
+ExponentTail
+| ExpMarker ExpSign digit _DigitTail
+| 
+
+ExpMarker
+| "e"
+| "E"
+| "s"
+| "S"
+| "f"
+| "F"
+| "d"
+| "D"
+| "l"
+| "L"
+
+ExpSign
+| "+"
+| "-"
+| 
+
+# -- Symbols -----------------------------------------------
+
+# R7RS-style identifiers. + and - are valid initials, enabling +, -, ->,
+# string->number, set!, call/cc, and :keyword to parse as symbols.
+
+Symbol
+| _SymbolInitial _SymbolTail
+
+_SymbolInitial
+| letter
+| "!"
+| "$"
+| "%"
+| "&"
+| "*"
+| "+"
+| "-"
+| "/"
+| ":"
+| "<"
+| "="
+| ">"
+| "?"
+| "^"
+| "_"
+| "~"
+
+_SymbolTail
+| letter _SymbolTail
+| digit _SymbolTail
+| "!" _SymbolTail
+| "$" _SymbolTail
+| "%" _SymbolTail
+| "&" _SymbolTail
+| "*" _SymbolTail
+| "/" _SymbolTail
+| ":" _SymbolTail
+| "<" _SymbolTail
+| "=" _SymbolTail
+| ">" _SymbolTail
+| "?" _SymbolTail
+| "^" _SymbolTail
+| "_" _SymbolTail
+| "~" _SymbolTail
+| "+" _SymbolTail
+| "-" _SymbolTail
+| "@" _SymbolTail
+| "." _SymbolTail
+| "'" _SymbolTail
+| 
+
+# -- Whitespace and line comments --------------------------
 
 OptionalBlank
 | space _OptionalBlankTail
 | new_line _OptionalBlankTail
-|
+| ";" _LineCommentTail
+| 
 
 RequiredBlank
 | space _OptionalBlankTail
 | new_line _OptionalBlankTail
+| ";" _LineCommentTail
 
 _OptionalBlankTail
 | space _OptionalBlankTail
 | new_line _OptionalBlankTail
-|
+| ";" _LineCommentTail
+| 
+
+_LineCommentTail
+| new_line _OptionalBlankTail
+| character^"\n" _LineCommentTail

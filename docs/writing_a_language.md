@@ -144,7 +144,7 @@ The executable will be built automatically — `build.zig` scans the `languages/
 Pass `--verbosity 1` (or `2`) to the generated executable to print the resulting AST alongside benchmark metrics:
 
 ```sh
-zig build ll-json -- languages/json/sample-code.json --verbosity 1
+zig build ll-json -- languages/json/samples/code-01.json --verbosity 1
 ```
 
 ---

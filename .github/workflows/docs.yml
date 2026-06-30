@@ -29,6 +29,9 @@ jobs:
           npm install
 
       - name: Build documentation
+        env:
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           cd docs
           npm run docs:build
@@ -37,8 +40,13 @@ jobs:
         run: |
           cd docs/.vitepress/dist
           git init
-          git config user.name "Codeberg Actions"
-          git config user.email "actions@codeberg.org"
+          if [[ "${{ github.server_url }}" == *github* ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+          else
+            git config user.name "Codeberg Actions"
+            git config user.email "actions@codeberg.org"
+          fi
           git checkout -b pages
           git add .
           git commit -m "Deploy docs (build #${{ github.run_number }})"

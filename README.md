@@ -49,15 +49,19 @@ zig build -Doptimize=ReleaseFast ll-flat_json -- languages/json/sample-code.json
 
 ---
 
-## Performance
+## Benchmarked Grammar Coverage
 
-Parsed bytes throughput on an **Apple M1 Pro** using the `flat_json` grammar:
+Galley benchmarks are meant to show both throughput and grammar breadth.
 
-| Mode | LL Throughput | LR Throughput |
+| Grammar | What it exercises | Parsers |
 | :--- | :--- | :--- |
-| **No AST** | **~723 MB/s** | **~285 MB/s** |
-| **AST, no terminals in AST** | **~444 MB/s** | **~108 MB/s** |
-| **AST, terminals in AST** | **~310 MB/s** | **~93 MB/s** |
+| **JSON** | Recursive data, strings, numbers, arrays, objects, third-party comparison baseline | LL + LR |
+| **Lisp** | Nested S-expressions, symbols, strings, integers, multiple top-level forms | LL |
+| **Lua** | Keyword-led statements, functions, calls, returns, keyed table constructors | LL |
+| **Galley Grammar** | The `.grm` language used to define Galley grammars | LL + LR |
+
+For current Apple M1 Pro throughput numbers across all bundled grammars and the JSON
+third-party comparison, see [BENCHMARKS.md](BENCHMARKS.md).
 
 ---
 

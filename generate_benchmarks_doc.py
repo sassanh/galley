@@ -293,6 +293,43 @@ def third_party_results(files: List[BenchmarkFile]) -> Dict[str, ParserResult]:
 # Section generators
 # ─────────────────────────────────────────────
 
+def section_bundled_grammar_coverage() -> str:
+    """Summarize bundled benchmark grammars without implying cross-language equivalence."""
+    headers = ["Grammar", "What it exercises", "Parsers"]
+    rows = [
+        [
+            "JSON / Flat JSON",
+            "Recursive data, strings, numbers, arrays, objects, third-party comparison baseline",
+            "LL + LR",
+        ],
+        [
+            "Lisp",
+            "Nested S-expressions, symbols, strings, integers, multiple top-level forms",
+            "LL",
+        ],
+        [
+            "Lua",
+            "Keyword-led statements, functions, calls, returns, keyed table constructors",
+            "LL",
+        ],
+        [
+            "Galley Grammar",
+            "The `.grm` language used to define Galley grammars",
+            "LL + LR",
+        ],
+    ]
+
+    return "\n".join([
+        "## Bundled Grammar Coverage\n",
+        "Galley benchmarks are meant to show both parser throughput and grammar breadth. "
+        "JSON is the head-to-head comparison target because mature third-party parsers "
+        "exist for it; Lisp, Lua, and the grammar parser exercise different language "
+        "shapes and should not be read as direct comparisons against JSON.\n",
+        md_table(headers, rows),
+        "",
+    ])
+
+
 def section_json_comparison(files: List[BenchmarkFile]) -> str:
     """Head-to-head JSON parsing with proper category grouping and framing."""
     lines: List[str] = []
@@ -454,12 +491,39 @@ GRAMMAR_DESCRIPTIONS: Dict[str, str] = {
 }
 
 
+GRAMMAR_SECTION_ORDER = [
+    "lua",
+    "lisp",
+    "json",
+    "flat_json",
+    "grammar",
+    "augmented-json",
+    "test-ll",
+    "test-ll1",
+]
+
+
+GRAMMAR_SECTION_LABELS = {
+    "lua": "Lua",
+    "lisp": "Lisp",
+    "json": "JSON",
+    "flat_json": "Flat JSON",
+    "grammar": "Galley",
+    "augmented-json": "Augmented JSON",
+    "test-ll": "Test LL",
+    "test-ll1": "Test LL1",
+}
+
+
 def section_galley_language(files: List[BenchmarkFile], grammar: str) -> str:
     """Per-language breakdown for Galley across all configurations."""
     lines: List[str] = []
 
-    label = grammar.replace("_", " ").replace("-", " ").title()
-    lines.append(f"## Galley — {label} Grammar\n")
+    label = GRAMMAR_SECTION_LABELS.get(
+        grammar,
+        grammar.replace("_", " ").replace("-", " ").title(),
+    )
+    lines.append(f"## {label}\n")
 
     desc = GRAMMAR_DESCRIPTIONS.get(grammar)
     if desc:
@@ -574,10 +638,17 @@ def main() -> None:
         print("ERROR: No benchmark result files found", file=sys.stderr)
         sys.exit(1)
 
-    # Discover available galley grammars
-    galley_grammars = sorted({
+    # Discover available galley grammars. Show broadly recognized languages first,
+    # then project-specific and regression grammars.
+    discovered_grammars = {
         bf.language for bf in files if bf.source == "galley" and bf.language
-    })
+    }
+    ordered_grammars = [
+        grammar for grammar in GRAMMAR_SECTION_ORDER if grammar in discovered_grammars
+    ]
+    ordered_grammars.extend(
+        grammar for grammar in sorted(discovered_grammars) if grammar not in ordered_grammars
+    )
 
     doc_parts: List[str] = []
 
@@ -595,11 +666,15 @@ Unless noted otherwise, results were recorded on an **Apple M1 Pro**.
 """)
 
     # JSON comparison (main headline section)
+    doc_parts.append(section_bundled_grammar_coverage())
+    doc_parts.append("---\n")
+
+    # JSON comparison (third-party headline section)
     doc_parts.append(section_json_comparison(files))
     doc_parts.append("---\n")
 
     # Per-grammar Galley breakdown
-    for grammar in galley_grammars:
+    for grammar in ordered_grammars:
         doc_parts.append(section_galley_language(files, grammar))
         doc_parts.append("---\n")
 

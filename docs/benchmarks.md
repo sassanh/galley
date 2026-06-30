@@ -52,7 +52,7 @@ Node Pool Memory Footprint: 227.68 KB
 
 ## Reference Benchmark Results
 
-For full benchmark results including comparisons with third-party parsers (simdjson, RapidJSON, Bison, LALRPOP, Nom, Tree-sitter), see the **[Benchmark Results](/benchmark_results)** page.
+For full benchmark results, see the **[Benchmark Results](/benchmark_results)** page. It includes per-grammar Galley measurements for JSON, Lisp, Lua, and Galley's own grammar format, plus a JSON-specific comparison against third-party parsers (simdjson, RapidJSON, Bison, LALRPOP, Nom, Tree-sitter).
 
 ---
 

@@ -9,6 +9,19 @@ Unless noted otherwise, results were recorded on an **Apple M1 Pro**.
 
 ---
 
+## Bundled Grammar Coverage
+
+Galley benchmarks are meant to show both parser throughput and grammar breadth. JSON is the head-to-head comparison target because mature third-party parsers exist for it; Lisp, Lua, and the grammar parser exercise different language shapes and should not be read as direct comparisons against JSON.
+
+| Grammar          | What it exercises                                                                  | Parsers |
+| ---------------- | ---------------------------------------------------------------------------------- | ------- |
+| JSON / Flat JSON | Recursive data, strings, numbers, arrays, objects, third-party comparison baseline | LL + LR |
+| Lisp             | Nested S-expressions, symbols, strings, integers, multiple top-level forms         | LL      |
+| Lua              | Keyword-led statements, functions, calls, returns, keyed table constructors        | LL      |
+| Galley Grammar   | The `.grm` language used to define Galley grammars                                 | LL + LR |
+
+---
+
 ## JSON Parsing — Throughput Comparison
 
 ### What are we comparing?
@@ -88,167 +101,7 @@ These libraries are optimised exclusively for JSON using SIMD intrinsics and two
 
 ---
 
-## Galley — Augmented Json Grammar
-
-_JSON extended with a custom prefix notation: `*value` and `(expr)` wrappers. Demonstrates how a standard grammar can be incrementally extended with new syntax without touching the original JSON rules — an LL-only grammar due to prefix ambiguity._
-
-_AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
-
-| AST | Term. | Limit | LL         | LR | LL/LR |
-| --- | ----- | ----- | ---------- | -- | ----- |
-| ✗   | ✗     | 16    | 609.4 MB/s | —  | —     |
-| ✗   | ✗     | 32    | 521.7 MB/s | —  | —     |
-| ✓   | ✓     | 16    | 235.8 MB/s | —  | —     |
-| ✓   | ✗     | 16    | 329.6 MB/s | —  | —     |
-| ✓   | ✓     | 32    | 213.1 MB/s | —  | —     |
-| ✓   | ✗     | 32    | 290.4 MB/s | —  | —     |
-
-```
-  LL  ✗ast ✗term lim=16  ████████████████████████████████████████     609.4 MB/s
-  LL  ✗ast ✗term lim=32  ██████████████████████████████████░░░░░░     521.7 MB/s
-  LL  ✓ast ✗term lim=16  █████████████████████░░░░░░░░░░░░░░░░░░░     329.6 MB/s
-  LL  ✓ast ✗term lim=32  ███████████████████░░░░░░░░░░░░░░░░░░░░░     290.4 MB/s
-  LL  ✓ast ✓term lim=16  ███████████████░░░░░░░░░░░░░░░░░░░░░░░░░     235.8 MB/s
-  LL  ✓ast ✓term lim=32  █████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░     213.1 MB/s
-  LR  ✗ast ✗term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-  LR  ✗ast ✗term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-  LR  ✓ast ✓term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-  LR  ✓ast ✗term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-  LR  ✓ast ✓term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-  LR  ✓ast ✗term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-```
-
----
-
-## Galley — Flat Json Grammar
-
-_Performance-optimised JSON grammar. Key–value pairs and array elements are inlined directly into their parent rules, eliminating intermediate non-terminals and reducing AST node allocations. This is Galley's fastest JSON grammar and the one used in the head-to-head comparison above._
-
-_AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
-
-| AST | Term. | Limit | LL         | LR         | LL/LR |
-| --- | ----- | ----- | ---------- | ---------- | ----- |
-| ✗   | ✗     | 16    | 715.1 MB/s | 293.2 MB/s | 2.44× |
-| ✗   | ✗     | 32    | 552.6 MB/s | 226.9 MB/s | 2.43× |
-| ✓   | ✓     | 16    | 313.5 MB/s | 93.5 MB/s  | 3.35× |
-| ✓   | ✗     | 16    | 434.5 MB/s | 106.8 MB/s | 4.07× |
-| ✓   | ✓     | 32    | 247.4 MB/s | 88.3 MB/s  | 2.80× |
-| ✓   | ✗     | 32    | 373.6 MB/s | 103.4 MB/s | 3.61× |
-
-```
-  LL  ✗ast ✗term lim=16  ████████████████████████████████████████     715.1 MB/s
-  LL  ✗ast ✗term lim=32  ██████████████████████████████░░░░░░░░░░     552.6 MB/s
-  LL  ✓ast ✗term lim=16  ████████████████████████░░░░░░░░░░░░░░░░     434.5 MB/s
-  LL  ✓ast ✗term lim=32  ████████████████████░░░░░░░░░░░░░░░░░░░░     373.6 MB/s
-  LL  ✓ast ✓term lim=16  █████████████████░░░░░░░░░░░░░░░░░░░░░░░     313.5 MB/s
-  LR  ✗ast ✗term lim=16  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░     293.2 MB/s
-  LL  ✓ast ✓term lim=32  █████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░     247.4 MB/s
-  LR  ✗ast ✗term lim=32  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░     226.9 MB/s
-  LR  ✓ast ✗term lim=16  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░     106.8 MB/s
-  LR  ✓ast ✗term lim=32  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░     103.4 MB/s
-  LR  ✓ast ✓term lim=16  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      93.5 MB/s
-  LR  ✓ast ✓term lim=32  ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      88.3 MB/s
-```
-
----
-
-## Galley — Grammar Grammar
-
-_Galley's own grammar file format (`.grm`). This is the self-hosting grammar: Galley uses itself to parse the grammar files that define its languages, including this one. Exercises nested rules, procedure annotations, comment syntax, and indentation-sensitive constructs._
-
-_AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
-
-| AST | Term. | Limit | LL         | LR         | LL/LR |
-| --- | ----- | ----- | ---------- | ---------- | ----- |
-| ✗   | ✗     | 16    | 390.8 MB/s | 158.8 MB/s | 2.46× |
-| ✗   | ✗     | 32    | 365.2 MB/s | 154.6 MB/s | 2.36× |
-| ✓   | ✓     | 16    | 89.9 MB/s  | 58.5 MB/s  | 1.54× |
-| ✓   | ✗     | 16    | 125.6 MB/s | 71.3 MB/s  | 1.76× |
-| ✓   | ✓     | 32    | 79.8 MB/s  | 55.2 MB/s  | 1.45× |
-| ✓   | ✗     | 32    | 115.1 MB/s | 67.7 MB/s  | 1.70× |
-
-```
-  LL  ✗ast ✗term lim=16  ████████████████████████████████████████     390.8 MB/s
-  LL  ✗ast ✗term lim=32  █████████████████████████████████████░░░     365.2 MB/s
-  LR  ✗ast ✗term lim=16  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░     158.8 MB/s
-  LR  ✗ast ✗term lim=32  ███████████████░░░░░░░░░░░░░░░░░░░░░░░░░     154.6 MB/s
-  LL  ✓ast ✗term lim=16  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░     125.6 MB/s
-  LL  ✓ast ✗term lim=32  ███████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░     115.1 MB/s
-  LL  ✓ast ✓term lim=16  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      89.9 MB/s
-  LL  ✓ast ✓term lim=32  ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      79.8 MB/s
-  LR  ✓ast ✗term lim=16  ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      71.3 MB/s
-  LR  ✓ast ✗term lim=32  ██████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      67.7 MB/s
-  LR  ✓ast ✓term lim=16  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      58.5 MB/s
-  LR  ✓ast ✓term lim=32  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      55.2 MB/s
-```
-
----
-
-## Galley — Json Grammar
-
-_Standard JSON (RFC 8259). A faithful, idiomatic grammar with separate non-terminals for objects, arrays, members, strings, and numbers. Serves as the reference implementation and the input grammar for the third-party comparison._
-
-_AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
-
-| AST | Term. | Limit | LL         | LR         | LL/LR |
-| --- | ----- | ----- | ---------- | ---------- | ----- |
-| ✗   | ✗     | 16    | 638.6 MB/s | 265.9 MB/s | 2.40× |
-| ✗   | ✗     | 32    | 537.4 MB/s | 198.7 MB/s | 2.70× |
-| ✓   | ✓     | 16    | 264.6 MB/s | 68.7 MB/s  | 3.85× |
-| ✓   | ✗     | 16    | 358.8 MB/s | 84.9 MB/s  | 4.23× |
-| ✓   | ✓     | 32    | 234.5 MB/s | 68.2 MB/s  | 3.44× |
-| ✓   | ✗     | 32    | 302.1 MB/s | 79.6 MB/s  | 3.79× |
-
-```
-  LL  ✗ast ✗term lim=16  ████████████████████████████████████████     638.6 MB/s
-  LL  ✗ast ✗term lim=32  █████████████████████████████████░░░░░░░     537.4 MB/s
-  LL  ✓ast ✗term lim=16  ██████████████████████░░░░░░░░░░░░░░░░░░     358.8 MB/s
-  LL  ✓ast ✗term lim=32  ██████████████████░░░░░░░░░░░░░░░░░░░░░░     302.1 MB/s
-  LR  ✗ast ✗term lim=16  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░     265.9 MB/s
-  LL  ✓ast ✓term lim=16  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░     264.6 MB/s
-  LL  ✓ast ✓term lim=32  ██████████████░░░░░░░░░░░░░░░░░░░░░░░░░░     234.5 MB/s
-  LR  ✗ast ✗term lim=32  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░     198.7 MB/s
-  LR  ✓ast ✗term lim=16  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      84.9 MB/s
-  LR  ✓ast ✗term lim=32  ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      79.6 MB/s
-  LR  ✓ast ✓term lim=16  ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      68.7 MB/s
-  LR  ✓ast ✓term lim=32  ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      68.2 MB/s
-```
-
----
-
-## Galley — Lisp Grammar
-
-_A compact S-expression grammar for Lisp-like programs. It exercises nested lists, symbols, integer literals, strings, and multiple top-level forms while remaining small enough to serve as a readable programming-language example._
-
-_AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
-
-| AST | Term. | Limit | LL         | LR | LL/LR |
-| --- | ----- | ----- | ---------- | -- | ----- |
-| ✗   | ✗     | 16    | 300.8 MB/s | —  | —     |
-| ✗   | ✗     | 32    | 289.6 MB/s | —  | —     |
-| ✓   | ✓     | 16    | 160.3 MB/s | —  | —     |
-| ✓   | ✗     | 16    | 188.1 MB/s | —  | —     |
-| ✓   | ✓     | 32    | 159.5 MB/s | —  | —     |
-| ✓   | ✗     | 32    | 185.4 MB/s | —  | —     |
-
-```
-  LL  ✗ast ✗term lim=16  ████████████████████████████████████████     300.8 MB/s
-  LL  ✗ast ✗term lim=32  ██████████████████████████████████████░░     289.6 MB/s
-  LL  ✓ast ✗term lim=16  █████████████████████████░░░░░░░░░░░░░░░     188.1 MB/s
-  LL  ✓ast ✗term lim=32  ████████████████████████░░░░░░░░░░░░░░░░     185.4 MB/s
-  LL  ✓ast ✓term lim=16  █████████████████████░░░░░░░░░░░░░░░░░░░     160.3 MB/s
-  LL  ✓ast ✓term lim=32  █████████████████████░░░░░░░░░░░░░░░░░░░     159.5 MB/s
-  LR  ✗ast ✗term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-  LR  ✗ast ✗term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-  LR  ✓ast ✓term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-  LR  ✓ast ✗term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-  LR  ✓ast ✓term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-  LR  ✓ast ✗term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
-```
-
----
-
-## Galley — Lua Grammar
+## Lua
 
 _A compact Lua subset grammar. It exercises keyword-led statements, function declarations, returns, function-call expressions, integer literals, strings, and keyed table constructors._
 
@@ -280,7 +133,167 @@ _AST = build syntax tree · Term. = include terminal nodes in tree · Limit = to
 
 ---
 
-## Galley — Test Ll Grammar
+## Lisp
+
+_A compact S-expression grammar for Lisp-like programs. It exercises nested lists, symbols, integer literals, strings, and multiple top-level forms while remaining small enough to serve as a readable programming-language example._
+
+_AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
+
+| AST | Term. | Limit | LL         | LR | LL/LR |
+| --- | ----- | ----- | ---------- | -- | ----- |
+| ✗   | ✗     | 16    | 300.8 MB/s | —  | —     |
+| ✗   | ✗     | 32    | 289.6 MB/s | —  | —     |
+| ✓   | ✓     | 16    | 160.3 MB/s | —  | —     |
+| ✓   | ✗     | 16    | 188.1 MB/s | —  | —     |
+| ✓   | ✓     | 32    | 159.5 MB/s | —  | —     |
+| ✓   | ✗     | 32    | 185.4 MB/s | —  | —     |
+
+```
+  LL  ✗ast ✗term lim=16  ████████████████████████████████████████     300.8 MB/s
+  LL  ✗ast ✗term lim=32  ██████████████████████████████████████░░     289.6 MB/s
+  LL  ✓ast ✗term lim=16  █████████████████████████░░░░░░░░░░░░░░░     188.1 MB/s
+  LL  ✓ast ✗term lim=32  ████████████████████████░░░░░░░░░░░░░░░░     185.4 MB/s
+  LL  ✓ast ✓term lim=16  █████████████████████░░░░░░░░░░░░░░░░░░░     160.3 MB/s
+  LL  ✓ast ✓term lim=32  █████████████████████░░░░░░░░░░░░░░░░░░░     159.5 MB/s
+  LR  ✗ast ✗term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+  LR  ✗ast ✗term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+  LR  ✓ast ✓term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+  LR  ✓ast ✗term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+  LR  ✓ast ✓term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+  LR  ✓ast ✗term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+```
+
+---
+
+## JSON
+
+_Standard JSON (RFC 8259). A faithful, idiomatic grammar with separate non-terminals for objects, arrays, members, strings, and numbers. Serves as the reference implementation and the input grammar for the third-party comparison._
+
+_AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
+
+| AST | Term. | Limit | LL         | LR         | LL/LR |
+| --- | ----- | ----- | ---------- | ---------- | ----- |
+| ✗   | ✗     | 16    | 638.6 MB/s | 265.9 MB/s | 2.40× |
+| ✗   | ✗     | 32    | 537.4 MB/s | 198.7 MB/s | 2.70× |
+| ✓   | ✓     | 16    | 264.6 MB/s | 68.7 MB/s  | 3.85× |
+| ✓   | ✗     | 16    | 358.8 MB/s | 84.9 MB/s  | 4.23× |
+| ✓   | ✓     | 32    | 234.5 MB/s | 68.2 MB/s  | 3.44× |
+| ✓   | ✗     | 32    | 302.1 MB/s | 79.6 MB/s  | 3.79× |
+
+```
+  LL  ✗ast ✗term lim=16  ████████████████████████████████████████     638.6 MB/s
+  LL  ✗ast ✗term lim=32  █████████████████████████████████░░░░░░░     537.4 MB/s
+  LL  ✓ast ✗term lim=16  ██████████████████████░░░░░░░░░░░░░░░░░░     358.8 MB/s
+  LL  ✓ast ✗term lim=32  ██████████████████░░░░░░░░░░░░░░░░░░░░░░     302.1 MB/s
+  LR  ✗ast ✗term lim=16  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░     265.9 MB/s
+  LL  ✓ast ✓term lim=16  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░     264.6 MB/s
+  LL  ✓ast ✓term lim=32  ██████████████░░░░░░░░░░░░░░░░░░░░░░░░░░     234.5 MB/s
+  LR  ✗ast ✗term lim=32  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░     198.7 MB/s
+  LR  ✓ast ✗term lim=16  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      84.9 MB/s
+  LR  ✓ast ✗term lim=32  ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      79.6 MB/s
+  LR  ✓ast ✓term lim=16  ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      68.7 MB/s
+  LR  ✓ast ✓term lim=32  ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      68.2 MB/s
+```
+
+---
+
+## Flat JSON
+
+_Performance-optimised JSON grammar. Key–value pairs and array elements are inlined directly into their parent rules, eliminating intermediate non-terminals and reducing AST node allocations. This is Galley's fastest JSON grammar and the one used in the head-to-head comparison above._
+
+_AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
+
+| AST | Term. | Limit | LL         | LR         | LL/LR |
+| --- | ----- | ----- | ---------- | ---------- | ----- |
+| ✗   | ✗     | 16    | 715.1 MB/s | 293.2 MB/s | 2.44× |
+| ✗   | ✗     | 32    | 552.6 MB/s | 226.9 MB/s | 2.43× |
+| ✓   | ✓     | 16    | 313.5 MB/s | 93.5 MB/s  | 3.35× |
+| ✓   | ✗     | 16    | 434.5 MB/s | 106.8 MB/s | 4.07× |
+| ✓   | ✓     | 32    | 247.4 MB/s | 88.3 MB/s  | 2.80× |
+| ✓   | ✗     | 32    | 373.6 MB/s | 103.4 MB/s | 3.61× |
+
+```
+  LL  ✗ast ✗term lim=16  ████████████████████████████████████████     715.1 MB/s
+  LL  ✗ast ✗term lim=32  ██████████████████████████████░░░░░░░░░░     552.6 MB/s
+  LL  ✓ast ✗term lim=16  ████████████████████████░░░░░░░░░░░░░░░░     434.5 MB/s
+  LL  ✓ast ✗term lim=32  ████████████████████░░░░░░░░░░░░░░░░░░░░     373.6 MB/s
+  LL  ✓ast ✓term lim=16  █████████████████░░░░░░░░░░░░░░░░░░░░░░░     313.5 MB/s
+  LR  ✗ast ✗term lim=16  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░     293.2 MB/s
+  LL  ✓ast ✓term lim=32  █████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░     247.4 MB/s
+  LR  ✗ast ✗term lim=32  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░     226.9 MB/s
+  LR  ✓ast ✗term lim=16  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░     106.8 MB/s
+  LR  ✓ast ✗term lim=32  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░     103.4 MB/s
+  LR  ✓ast ✓term lim=16  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      93.5 MB/s
+  LR  ✓ast ✓term lim=32  ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      88.3 MB/s
+```
+
+---
+
+## Galley
+
+_Galley's own grammar file format (`.grm`). This is the self-hosting grammar: Galley uses itself to parse the grammar files that define its languages, including this one. Exercises nested rules, procedure annotations, comment syntax, and indentation-sensitive constructs._
+
+_AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
+
+| AST | Term. | Limit | LL         | LR         | LL/LR |
+| --- | ----- | ----- | ---------- | ---------- | ----- |
+| ✗   | ✗     | 16    | 390.8 MB/s | 158.8 MB/s | 2.46× |
+| ✗   | ✗     | 32    | 365.2 MB/s | 154.6 MB/s | 2.36× |
+| ✓   | ✓     | 16    | 89.9 MB/s  | 58.5 MB/s  | 1.54× |
+| ✓   | ✗     | 16    | 125.6 MB/s | 71.3 MB/s  | 1.76× |
+| ✓   | ✓     | 32    | 79.8 MB/s  | 55.2 MB/s  | 1.45× |
+| ✓   | ✗     | 32    | 115.1 MB/s | 67.7 MB/s  | 1.70× |
+
+```
+  LL  ✗ast ✗term lim=16  ████████████████████████████████████████     390.8 MB/s
+  LL  ✗ast ✗term lim=32  █████████████████████████████████████░░░     365.2 MB/s
+  LR  ✗ast ✗term lim=16  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░     158.8 MB/s
+  LR  ✗ast ✗term lim=32  ███████████████░░░░░░░░░░░░░░░░░░░░░░░░░     154.6 MB/s
+  LL  ✓ast ✗term lim=16  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░     125.6 MB/s
+  LL  ✓ast ✗term lim=32  ███████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░     115.1 MB/s
+  LL  ✓ast ✓term lim=16  █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      89.9 MB/s
+  LL  ✓ast ✓term lim=32  ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      79.8 MB/s
+  LR  ✓ast ✗term lim=16  ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      71.3 MB/s
+  LR  ✓ast ✗term lim=32  ██████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      67.7 MB/s
+  LR  ✓ast ✓term lim=16  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      58.5 MB/s
+  LR  ✓ast ✓term lim=32  █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      55.2 MB/s
+```
+
+---
+
+## Augmented JSON
+
+_JSON extended with a custom prefix notation: `*value` and `(expr)` wrappers. Demonstrates how a standard grammar can be incrementally extended with new syntax without touching the original JSON rules — an LL-only grammar due to prefix ambiguity._
+
+_AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
+
+| AST | Term. | Limit | LL         | LR | LL/LR |
+| --- | ----- | ----- | ---------- | -- | ----- |
+| ✗   | ✗     | 16    | 609.4 MB/s | —  | —     |
+| ✗   | ✗     | 32    | 521.7 MB/s | —  | —     |
+| ✓   | ✓     | 16    | 235.8 MB/s | —  | —     |
+| ✓   | ✗     | 16    | 329.6 MB/s | —  | —     |
+| ✓   | ✓     | 32    | 213.1 MB/s | —  | —     |
+| ✓   | ✗     | 32    | 290.4 MB/s | —  | —     |
+
+```
+  LL  ✗ast ✗term lim=16  ████████████████████████████████████████     609.4 MB/s
+  LL  ✗ast ✗term lim=32  ██████████████████████████████████░░░░░░     521.7 MB/s
+  LL  ✓ast ✗term lim=16  █████████████████████░░░░░░░░░░░░░░░░░░░     329.6 MB/s
+  LL  ✓ast ✗term lim=32  ███████████████████░░░░░░░░░░░░░░░░░░░░░     290.4 MB/s
+  LL  ✓ast ✓term lim=16  ███████████████░░░░░░░░░░░░░░░░░░░░░░░░░     235.8 MB/s
+  LL  ✓ast ✓term lim=32  █████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░     213.1 MB/s
+  LR  ✗ast ✗term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+  LR  ✗ast ✗term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+  LR  ✓ast ✓term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+  LR  ✓ast ✗term lim=16  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+  LR  ✓ast ✓term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+  LR  ✓ast ✗term lim=32  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       0.0 MB/s
+```
+
+---
+
+## Test LL
 
 _A structured data/schema language with `Name: { fields }` declarations and embedded logic blocks. Uses the `@back` backtracking annotation, making it an LL (with limited backtracking) grammar. Included as a regression and capability test for the LL parser._
 
@@ -312,7 +325,7 @@ _AST = build syntax tree · Term. = include terminal nodes in tree · Limit = to
 
 ---
 
-## Galley — Test Ll1 Grammar
+## Test LL1
 
 _The same schema language as test-ll, rewritten to be strictly LL(1) — no backtracking. Delimiter tokens are chosen to make every decision point unambiguous with one token of lookahead. Used to benchmark the LL(1) fast-path against the backtracking variant._
 

@@ -41,7 +41,7 @@ class ParserResult:
 class BenchmarkFile:
     path: str
     source: str          # "galley" or "third_party"
-    language: str        # "json", "grammar", "augmented-json", etc.
+    language: str        # "json", "galley", "augmented-json", etc.
     input_file: str      # e.g. "languages/json/samples/code-01.json"
     ast_mode: str        # "no-ast", "no-procedures", "" (third_party)
     size_limit: str      # "size_16", "size_32", "" (third_party)
@@ -462,7 +462,7 @@ GRAMMAR_DESCRIPTIONS: Dict[str, str] = {
         "Demonstrates how a standard grammar can be incrementally extended with new syntax "
         "without touching the original JSON rules — an LL-only grammar due to prefix ambiguity."
     ),
-    "grammar": (
+    "galley": (
         "Galley's own grammar file format (`.grm`). This is the self-hosting grammar: "
         "Galley uses itself to parse the grammar files that define its languages, including "
         "this one. Exercises nested rules, procedure annotations, comment syntax, and "
@@ -497,7 +497,7 @@ GRAMMAR_SECTION_ORDER = [
     "lisp",
     "json",
     "json-structured-ast",
-    "grammar",
+    "galley",
     "augmented-json",
     "test-ll",
     "test-ll1",
@@ -509,7 +509,7 @@ GRAMMAR_SECTION_LABELS = {
     "lisp": "Lisp",
     "json": "JSON",
     "json-structured-ast": "JSON Structured AST",
-    "grammar": "Galley",
+    "galley": "Galley",
     "augmented-json": "Augmented JSON",
     "test-ll": "Test LL",
     "test-ll1": "Test LL1",

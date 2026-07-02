@@ -127,7 +127,7 @@ if (comptime reduction_procedure) |procedure_pointer| {{
 }}
 
 if (comptime builtin.mode == .Debug) {{
-    if (context.verbosity > 2) {{
+    if (context.verbosityLevel() > 2) {{
         std.debug.print("Procedure outcome for {
             self.token_repr(symbol.id, in_format_string=True)
         }: {{f}}\\n", .{{
@@ -327,7 +327,7 @@ repeating_node = context.node_allocator.at(repeating_node_address);
         return (
             f"""
 if (comptime builtin.mode == .Debug) {{
-    if (context.verbosity > 1) {{
+    if (context.verbosityLevel() > 1) {{
         std.debug.print("Rule expansion: {repr(variable)} -> {
                 ", ".join(
                     [
@@ -345,7 +345,7 @@ if (comptime builtin.mode == .Debug) {{
             + (
                 f"""
 if (comptime builtin.mode == .Debug) {{
-    if (context.verbosity > 1) {{
+    if (context.verbosityLevel() > 1) {{
         std.debug.print("Reduction: {repr(variable)} <~ {
                     ", ".join(
                         [
@@ -603,7 +603,7 @@ fn parse_{repr(symbol)}_{self.rules[variable.id].index(rhs)}_{self_repeating_ind
 {
                                     f'''
         if (comptime builtin.mode == .Debug) {{
-            if (context.verbosity > 1) {{
+            if (context.verbosityLevel() > 1) {{
                 std.debug.print("Reduction: {repr(variable)} <~ {
                                         ", ".join(
                                             [
@@ -752,7 +752,7 @@ pub fn parse(context: *data_structures.Context) !void {{
         return;
     }};
 
-    if (context.verbosity > 0) {{
+    if (context.verbosityLevel() > 0) {{
         std.log.info("The input file was parsed successfully!", .{{}});
     }}
 }}"""

@@ -62,17 +62,17 @@ pub fn replace_with_children(args: *ProcedureArguments) !void {
 }
 
 pub fn reduction_Start(args: *ProcedureArguments) !void {
-    if (if (args.context.verbosity > 0) args.node else null) |node_address| {
+    if (if (args.context.verbosityLevel() > 0) args.node else null) |node_address| {
         std.debug.print("\nProgram text:\n{s}\n", .{try data_structures.ASTNode.augmented_text(node_address, args.context)});
     }
 
-    const log_file = try std.Io.Dir.cwd().createFile(args.context.io, "sanbus-parse.log", .{
+    const log_file = try std.Io.Dir.cwd().createFile(args.context.runtime().io, "sanbus-parse.log", .{
         .lock = .exclusive,
     });
-    defer log_file.close(args.context.io);
+    defer log_file.close(args.context.runtime().io);
 
     var buffer: [4096]u8 = undefined;
-    var buffered_writer: std.Io.File.Writer = .init(log_file, args.context.io, &buffer);
+    var buffered_writer: std.Io.File.Writer = .init(log_file, args.context.runtime().io, &buffer);
     const writer = &buffered_writer.interface;
 
     if (args.node) |node_address| {

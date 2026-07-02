@@ -18,17 +18,30 @@ fn findScalarLast(comptime T: type, slice: []const T, value: T) ?Context.Size {
     return null;
 }
 
-pub const Context = struct {
-    pub const Size = root.parser.input_size_cap;
-
-    node_allocator: *data_structures.ASTAllocator,
-    arena_allocator: std.mem.Allocator,
+pub const RuntimeContext = struct {
     io: std.Io,
     input_path: ?[]const u8 = null,
     language_options: root.config.Options = .{},
+};
 
-    reader: std.Io.File.Reader = undefined,
-    chunk_buffer: []u8 = undefined,
+var active_runtime_context: ?*RuntimeContext = null;
+
+pub fn activateRuntimeContext(runtime_context: *RuntimeContext) void {
+    active_runtime_context = runtime_context;
+}
+
+pub fn deactivateRuntimeContext(runtime_context: *RuntimeContext) void {
+    std.debug.assert(active_runtime_context == runtime_context);
+    active_runtime_context = null;
+}
+
+fn runtimeContext() *RuntimeContext {
+    return active_runtime_context orelse unreachable;
+}
+
+pub const Context = struct {
+    pub const Size = root.parser.input_size_cap;
+
     line: if (builtin.mode != .ReleaseFast) u32 else void = if (builtin.mode != .ReleaseFast) 1 else {},
     column: if (builtin.mode != .ReleaseFast) u32 else void = if (builtin.mode != .ReleaseFast) 1 else {},
 
@@ -42,19 +55,35 @@ pub const Context = struct {
     else
         void = if (builtin.mode != .ReleaseFast) .{} else {},
 
-    indent_width: u16 = 0,
-    current_indent: u16 = 0,
+    indent_width: if (root.procedures.indentation_syntax) u16 else void = if (root.procedures.indentation_syntax) 0 else {},
+    current_indent: if (root.procedures.indentation_syntax) u16 else void = if (root.procedures.indentation_syntax) 0 else {},
 
     seek: if (root.procedures.indentation_syntax) Size else void = if (root.procedures.indentation_syntax) 0 else {},
-    read_bytes: Size = 0,
-    verbosity: usize,
-
-    advance_input_mode: enum {
-        without_check,
-        with_check,
-    } = undefined,
+    read_bytes: if (root.procedures.indentation_syntax) Size else void = if (root.procedures.indentation_syntax) 0 else {},
+    verbosity: if (builtin.mode == .Debug) usize else void = if (builtin.mode == .Debug) 0 else {},
+    arena_allocator: std.mem.Allocator,
+    node_allocator: if (root.parser.is_ast_enabled) *data_structures.ASTAllocator else void = if (root.parser.is_ast_enabled) undefined else {},
+    reader: std.Io.File.Reader = undefined,
+    chunk_buffer: []u8 = undefined,
 
     const Self = @This();
+
+    pub inline fn runtime(self: *Self) *RuntimeContext {
+        _ = self;
+        return runtimeContext();
+    }
+
+    pub inline fn runtimeConst(self: *const Self) *const RuntimeContext {
+        _ = self;
+        return runtimeContext();
+    }
+
+    pub inline fn verbosityLevel(self: *const Self) usize {
+        if (comptime builtin.mode == .Debug) {
+            return self.verbosity;
+        }
+        return 0;
+    }
 
     pub fn release_token(self: *@This(), length: Size) void {
         if (comptime builtin.mode != .ReleaseFast) {
@@ -90,17 +119,16 @@ pub const Context = struct {
 
         if (bytes_read < self.chunk_buffer.len) {
             self.chunk_buffer[bytes_read] = '\x00';
-            self.advance_input_mode = .without_check;
         }
     }
 
     pub fn reset(self: *@This()) !void {
-        self.advance_input_mode = .with_check;
-
         try self.reader.seekTo(0);
-        self.read_bytes = 0;
         if (comptime root.procedures.indentation_syntax) {
+            self.read_bytes = 0;
             self.seek = 0;
+            self.indent_width = 0;
+            self.current_indent = 0;
         }
         if (comptime builtin.mode != .ReleaseFast) {
             self.line = 1;
@@ -109,7 +137,9 @@ pub const Context = struct {
             self.column_offsets.reset();
         }
         self.token.reset(self.chunk_buffer);
-        self.node_allocator.reset();
+        if (comptime root.parser.is_ast_enabled) {
+            self.node_allocator.reset();
+        }
         self.read();
     }
 
@@ -132,21 +162,18 @@ pub const Context = struct {
 
     pub inline fn advance_input(self: *@This()) void {
         if (comptime root.procedures.indentation_syntax) {
-            // if (self.advance_input_mode == .with_check) {
-            //     self.advance_input_with_check();
-            // } else {
             self.advance_input_without_check();
-            // }
         }
     }
 
     pub inline fn advance_lexer(self: *@This()) void {
         if (comptime root.procedures.indentation_syntax) {
-            while (self.chunk_buffer[self.seek] == '\n') {
+            const chunk_buffer = self.chunk_buffer;
+            while (chunk_buffer[self.seek] == '\n') {
                 self.advance_input();
                 var line_spaces: u16 = 0;
 
-                while (self.chunk_buffer[self.seek] == ' ') {
+                while (chunk_buffer[self.seek] == ' ') {
                     self.advance_input();
                     line_spaces += 1;
                 }
@@ -216,7 +243,7 @@ pub const Context = struct {
         }
 
         if (comptime builtin.mode == .Debug) {
-            if (self.verbosity > 1) {
+            if (self.verbosityLevel() > 1) {
                 std.debug.print("\n{d}:{d}:\"{f}\"\n", .{
                     if (comptime builtin.mode != .ReleaseFast) self.line else 0,
                     if (comptime builtin.mode != .ReleaseFast) self.column else 0,
@@ -244,7 +271,7 @@ pub const Context = struct {
     }
 
     pub inline fn pos(self: *Self) Size {
-        return self.read_bytes + self.token.head - self.token.len;
+        return (if (comptime root.procedures.indentation_syntax) self.read_bytes else 0) + self.token.head - self.token.len;
     }
 
     pub inline fn get_text_slice(self: *const Self, start: Size, length: Size) []const u8 {

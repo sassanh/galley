@@ -1,4 +1,5 @@
 const clap = @import("clap");
+const builtin = @import("builtin");
 const std = @import("std");
 
 pub const procedures = @import("procedures");
@@ -79,17 +80,27 @@ pub fn main(init: std.process.Init) !void {
 
     var allocator = try data_structures.ASTAllocator.init_capacity(arena_allocator);
 
-    var context = data_structures.Context{
-        .node_allocator = &allocator,
-        .arena_allocator = arena_allocator,
+    const runtime_context = try init.gpa.create(data_structures.RuntimeContext);
+    defer init.gpa.destroy(runtime_context);
+    runtime_context.* = .{
+        .io = io,
         .input_path = input_path,
         .language_options = config.optionsFromArgs(res.args),
-        .verbosity = verbosity,
-        .io = io,
+    };
+
+    data_structures.activateRuntimeContext(runtime_context);
+    defer data_structures.deactivateRuntimeContext(runtime_context);
+
+    var context = data_structures.Context{
+        .arena_allocator = arena_allocator,
+        .node_allocator = if (parser.is_ast_enabled) &allocator else {},
         .reader = program_file.reader(io, reader_buffer),
         .chunk_buffer = try init.gpa.alloc(u8, read_chunk_size),
     };
     defer init.gpa.free(context.chunk_buffer);
+    if (comptime builtin.mode == .Debug) {
+        context.verbosity = verbosity;
+    }
 
     if (@field(res.args, "disable-stack-overflow-recovery") > 0)
         try run(&context, warmup_iterations, iterations)
@@ -105,7 +116,8 @@ fn run(context: *data_structures.Context, warmup_iterations: usize, iterations: 
     }
 
     var total_parsed_bytes: usize = 0;
-    const start = std.Io.Clock.awake.now(context.io);
+    const runtime = context.runtime();
+    const start = std.Io.Clock.awake.now(runtime.io);
 
     for (0..iterations) |_| {
         try context.reset();
@@ -115,7 +127,7 @@ fn run(context: *data_structures.Context, warmup_iterations: usize, iterations: 
     }
 
     if (iterations > 1) {
-        const end = std.Io.Clock.awake.now(context.io);
+        const end = std.Io.Clock.awake.now(runtime.io);
         const duration = start.durationTo(end);
         const elapsed_ns: usize = @intCast(duration.toNanoseconds());
         const duration_secs = @as(f64, @floatFromInt(elapsed_ns)) / 1e9;
@@ -125,8 +137,9 @@ fn run(context: *data_structures.Context, warmup_iterations: usize, iterations: 
         std.debug.print("Parsed bytes:  {s}\n", .{try string_utilities.formatFileSize(total_parsed_bytes, &buffer)});
         std.debug.print("Duration:      {s} ns\n", .{try string_utilities.formatWithThousands(elapsed_ns, &buffer)});
         std.debug.print("Throughput:    {s}/s\n", .{try string_utilities.formatFileSize(mbps, &buffer)});
+        const nodes_allocated = if (comptime parser.is_ast_enabled) context.node_allocator.counter else 0;
         std.debug.print("Nodes allocated:    {s}\n", .{try string_utilities.formatWithThousands(
-            context.node_allocator.counter,
+            nodes_allocated,
             &buffer,
         )});
     }

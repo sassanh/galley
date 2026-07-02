@@ -79,7 +79,7 @@ pub fn reduction_Start(args: *ProcedureArguments) !void {
         try emitLlParserForInputPath(args.context, grammar);
     }
 
-    if (args.context.verbosity > 0)
+    if (args.context.verbosityLevel() > 0)
         std.debug.print("Parsed Galley grammar successfully.\n", .{});
 }
 
@@ -108,7 +108,7 @@ pub fn emitLlParserFromContext(context: *data_structures.Context, allocator: std
 }
 
 fn emitLlParserForInputPath(context: *data_structures.Context, grammar: *const Grammar) !void {
-    const input_path = context.input_path orelse return;
+    const input_path = context.runtime().input_path orelse return;
     if (!std.mem.endsWith(u8, input_path, "/ll.grm") and !std.mem.eql(u8, input_path, "ll.grm")) {
         return;
     }
@@ -116,21 +116,21 @@ fn emitLlParserForInputPath(context: *data_structures.Context, grammar: *const G
     const dir_path = std.fs.path.dirname(input_path) orelse ".";
     const output_path = try std.fs.path.join(context.arena_allocator, &.{ dir_path, "_ll-parser.zig" });
 
-    var output = try std.Io.Dir.cwd().createFile(context.io, output_path, .{ .truncate = true });
-    defer output.close(context.io);
+    var output = try std.Io.Dir.cwd().createFile(context.runtime().io, output_path, .{ .truncate = true });
+    defer output.close(context.runtime().io);
 
     var buffer: [8192]u8 = undefined;
-    var file_writer = output.writer(context.io, &buffer);
+    var file_writer = output.writer(context.runtime().io, &buffer);
     try emitLlParserWithOptions(grammar, context.arena_allocator, &file_writer.interface, generatorOptionsFromContext(context));
     try file_writer.interface.flush();
 }
 
 fn generatorOptionsFromContext(context: *data_structures.Context) ll_generator.Options {
     return .{
-        .with_ast = context.language_options.with_ast,
-        .with_procedures = context.language_options.with_procedures,
-        .ast_for_terminals = context.language_options.ast_for_terminals,
-        .input_size = context.language_options.input_size,
+        .with_ast = context.runtime().language_options.with_ast,
+        .with_procedures = context.runtime().language_options.with_procedures,
+        .ast_for_terminals = context.runtime().language_options.ast_for_terminals,
+        .input_size = context.runtime().language_options.input_size,
     };
 }
 

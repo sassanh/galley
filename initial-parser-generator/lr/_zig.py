@@ -125,7 +125,7 @@ pub fn parse(context: *data_structures.Context) !void {{
         return error.ParseError;
     }}
 
-    if (context.verbosity > 0) {{
+    if (context.verbosityLevel() > 0) {{
         std.log.info("The input file was parsed successfully!", .{{}});
     }}
 }}"""
@@ -266,7 +266,7 @@ if (comptime reduction_procedure) |procedure_pointer| {{
             release = f"context.release_token({length});"
             debug_print = f"""
 if (comptime builtin.mode == .Debug) {{
-    if (context.verbosity > 1) {{
+    if (context.verbosityLevel() > 1) {{
         std.debug.print("Shift: matched '{{s}}', transitioning to state_{dest_state_index}\\n", .{{"{self.token_repr(symbol.id)}"}});
     }}
 }}
@@ -281,7 +281,7 @@ if (comptime builtin.mode == .Debug) {{
         elif isinstance(resolution, AcceptResolution):
             debug_print = """
 if (comptime builtin.mode == .Debug) {
-    if (context.verbosity > 1) {
+    if (context.verbosityLevel() > 1) {
         std.debug.print("Accept!\\n", .{});
     }
 }
@@ -362,7 +362,7 @@ if (comptime builtin.mode == .Debug) {
 """
                 debug_code = f"""
         if (comptime builtin.mode == .Debug) {{
-            if (context.verbosity > 1) {{
+            if (context.verbosityLevel() > 1) {{
                 std.debug.print("Reduction: {{s}} <~ ...\\n", .{{"{variable.printable}"}});
             }}
         }}
@@ -415,7 +415,7 @@ if (comptime builtin.mode == .Debug) {
 """
                 debug_code = f"""
         if (comptime builtin.mode == .Debug) {{
-            if (context.verbosity > 1) {{
+            if (context.verbosityLevel() > 1) {{
                 std.debug.print("Reduction (no AST): {{s}} <~ ...\\n", .{{"{variable.printable}"}});
             }}
         }}

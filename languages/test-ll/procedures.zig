@@ -222,7 +222,7 @@ pub const reduction_SideEffectsToDispatch_1 = drop_first_child;
 pub fn reduction_Rule(args: *ProcedureArguments) !void {
     if (args.node) |node_address| {
         const node = args.context.node_allocator.at(node_address);
-        if (args.context.verbosity > 0) {
+        if (args.context.verbosityLevel() > 0) {
             std.debug.print("{f}({d}) -> |", .{
                 string_utilities.fmtString(
                     if (args.rule.?.header == -1)
@@ -254,17 +254,17 @@ pub fn reduction_Rule(args: *ProcedureArguments) !void {
 }
 
 pub fn reduction_Start(args: *ProcedureArguments) !void {
-    if (if (args.context.verbosity > 0) args.node else null) |node_address| {
+    if (if (args.context.verbosityLevel() > 0) args.node else null) |node_address| {
         std.debug.print("\nProgram text:\n{s}\n", .{try ASTNode.augmented_text(node_address, args.context)});
     }
 
-    const log_file = try std.Io.Dir.cwd().createFile(args.context.io, "sanbus-parse.log", .{
+    const log_file = try std.Io.Dir.cwd().createFile(args.context.runtime().io, "sanbus-parse.log", .{
         .lock = .exclusive,
     });
-    defer log_file.close(args.context.io);
+    defer log_file.close(args.context.runtime().io);
 
     var buffer: [4096]u8 = undefined;
-    var buffered_writer: std.Io.File.Writer = .init(log_file, args.context.io, &buffer);
+    var buffered_writer: std.Io.File.Writer = .init(log_file, args.context.runtime().io, &buffer);
     const writer = &buffered_writer.interface;
 
     if (args.node) |node_address| {

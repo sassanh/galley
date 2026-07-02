@@ -6,6 +6,6 @@ pub const indentation_syntax = false;
 pub const Payload = struct {};
 
 pub fn reduction_Start(args: *ProcedureArguments) void {
-    if (args.context.verbosity > 0)
+    if (args.context.verbosityLevel() > 0)
         std.debug.print("Parsed Lua successfully.\n", .{});
 }

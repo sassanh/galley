@@ -7,11 +7,23 @@ pub fn build(b: *std.Build) !void {
     const clap = b.dependency("clap", .{});
 
     const languages_path = "languages";
+    const generator_common_mod = b.addModule("generator_common", .{
+        .root_source_file = b.path("src/generator/common.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
     const ll_generator_mod = b.addModule("ll_generator", .{
         .root_source_file = b.path("src/generator/ll.zig"),
         .target = target,
         .optimize = optimize,
     });
+    ll_generator_mod.addImport("generator_common", generator_common_mod);
+    const lr_generator_mod = b.addModule("lr_generator", .{
+        .root_source_file = b.path("src/generator/lr.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    lr_generator_mod.addImport("generator_common", generator_common_mod);
     var dir = try b.build_root.handle.openDir(b.graph.io, languages_path, .{ .iterate = true });
     defer dir.close(b.graph.io);
 
@@ -80,6 +92,7 @@ pub fn build(b: *std.Build) !void {
                 galley_mod.addImport("galley", galley_mod);
                 procedures_mod.addImport("galley", galley_mod);
                 procedures_mod.addImport("ll_generator", ll_generator_mod);
+                procedures_mod.addImport("lr_generator", lr_generator_mod);
                 config_mod.addImport("galley", galley_mod);
                 parser_mod.addImport("galley", galley_mod);
 

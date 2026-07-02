@@ -1,6 +1,7 @@
 const std = @import("std");
 const galley = @import("galley");
 const ll_generator = @import("ll_generator");
+const lr_generator = @import("lr_generator");
 const data_structures = galley.data_structures;
 const ProcedureArguments = data_structures.ProcedureArguments;
 
@@ -76,7 +77,7 @@ pub fn reduction_Start(args: *ProcedureArguments) !void {
         const grammar = try parseGrammar(args.context.arena_allocator, source);
         node.payload.grammar = grammar;
         last_grammar = grammar;
-        try emitLlParserForInputPath(args.context, grammar);
+        try emitParserForInputPath(args.context, grammar);
     }
 
     if (args.context.verbosityLevel() > 0)
@@ -107,25 +108,57 @@ pub fn emitLlParserFromContext(context: *data_structures.Context, allocator: std
     try emitLlParserWithOptions(grammar, allocator, writer, generatorOptionsFromContext(context));
 }
 
-fn emitLlParserForInputPath(context: *data_structures.Context, grammar: *const Grammar) !void {
+pub fn emitLrParser(grammar: *const Grammar, allocator: std.mem.Allocator, writer: *std.Io.Writer) !void {
+    try lr_generator.emitParser(allocator, grammar, writer);
+}
+
+pub fn emitLrParserWithOptions(grammar: *const Grammar, allocator: std.mem.Allocator, writer: *std.Io.Writer, options: lr_generator.Options) !void {
+    try lr_generator.emitParserWithOptions(allocator, grammar, writer, options);
+}
+
+pub fn emitLrParserFromContext(context: *data_structures.Context, allocator: std.mem.Allocator, writer: *std.Io.Writer) !void {
+    const grammar = grammarFromContext(context) orelse return error.GrammarModelMissing;
+    try emitLrParserWithOptions(grammar, allocator, writer, lrGeneratorOptionsFromContext(context));
+}
+
+fn emitParserForInputPath(context: *data_structures.Context, grammar: *const Grammar) !void {
     const input_path = context.runtime().input_path orelse return;
-    if (!std.mem.endsWith(u8, input_path, "/ll.grm") and !std.mem.eql(u8, input_path, "ll.grm")) {
+    const parser_type: enum { ll, lr } = if (std.mem.endsWith(u8, input_path, "/ll.grm") or std.mem.eql(u8, input_path, "ll.grm"))
+        .ll
+    else if (std.mem.endsWith(u8, input_path, "/lr.grm") or std.mem.eql(u8, input_path, "lr.grm"))
+        .lr
+    else
         return;
-    }
 
     const dir_path = std.fs.path.dirname(input_path) orelse ".";
-    const output_path = try std.fs.path.join(context.arena_allocator, &.{ dir_path, "_ll-parser.zig" });
+    const output_file = switch (parser_type) {
+        .ll => "_ll-parser.zig",
+        .lr => "_lr-parser.zig",
+    };
+    const output_path = try std.fs.path.join(context.arena_allocator, &.{ dir_path, output_file });
 
     var output = try std.Io.Dir.cwd().createFile(context.runtime().io, output_path, .{ .truncate = true });
     defer output.close(context.runtime().io);
 
     var buffer: [8192]u8 = undefined;
     var file_writer = output.writer(context.runtime().io, &buffer);
-    try emitLlParserWithOptions(grammar, context.arena_allocator, &file_writer.interface, generatorOptionsFromContext(context));
+    switch (parser_type) {
+        .ll => try emitLlParserWithOptions(grammar, context.arena_allocator, &file_writer.interface, generatorOptionsFromContext(context)),
+        .lr => try emitLrParserWithOptions(grammar, context.arena_allocator, &file_writer.interface, lrGeneratorOptionsFromContext(context)),
+    }
     try file_writer.interface.flush();
 }
 
 fn generatorOptionsFromContext(context: *data_structures.Context) ll_generator.Options {
+    return .{
+        .with_ast = context.runtime().language_options.with_ast,
+        .with_procedures = context.runtime().language_options.with_procedures,
+        .ast_for_terminals = context.runtime().language_options.ast_for_terminals,
+        .input_size = context.runtime().language_options.input_size,
+    };
+}
+
+fn lrGeneratorOptionsFromContext(context: *data_structures.Context) lr_generator.Options {
     return .{
         .with_ast = context.runtime().language_options.with_ast,
         .with_procedures = context.runtime().language_options.with_procedures,

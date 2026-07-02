@@ -7,6 +7,11 @@ pub fn build(b: *std.Build) !void {
     const clap = b.dependency("clap", .{});
 
     const languages_path = "languages";
+    const ll_generator_mod = b.addModule("ll_generator", .{
+        .root_source_file = b.path("src/generator/ll.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
     var dir = try b.build_root.handle.openDir(b.graph.io, languages_path, .{ .iterate = true });
     defer dir.close(b.graph.io);
 
@@ -31,11 +36,22 @@ pub fn build(b: *std.Build) !void {
             );
             defer b.allocator.free(procedures_path);
 
+            const config_path = try std.fs.path.join(
+                b.allocator,
+                &[_][]const u8{ languages_path, entry.path, "config.zig" },
+            );
+            defer b.allocator.free(config_path);
+
             // Check if file exists in this subdirectory
             const exists = b.build_root.handle.access(b.graph.io, parser_path, .{});
             if (exists) |_| {
                 const procedures_mod = b.addModule("procedures", .{
                     .root_source_file = b.path(procedures_path),
+                    .target = target,
+                });
+
+                const config_mod = b.addModule("config", .{
+                    .root_source_file = b.path(config_path),
                     .target = target,
                 });
 
@@ -57,11 +73,14 @@ pub fn build(b: *std.Build) !void {
                     .imports = &.{
                         .{ .name = "clap", .module = clap.module("clap") },
                         .{ .name = "procedures", .module = procedures_mod },
+                        .{ .name = "config", .module = config_mod },
                         .{ .name = "parser", .module = parser_mod },
                     },
                 });
                 galley_mod.addImport("galley", galley_mod);
                 procedures_mod.addImport("galley", galley_mod);
+                procedures_mod.addImport("ll_generator", ll_generator_mod);
+                config_mod.addImport("galley", galley_mod);
                 parser_mod.addImport("galley", galley_mod);
 
                 const exe = b.addExecutable(.{

@@ -2,6 +2,7 @@ const clap = @import("clap");
 const std = @import("std");
 
 pub const procedures = @import("procedures");
+pub const config = @import("config");
 pub const parser = @import("parser");
 pub const string_utilities = @import("utilities/string.zig");
 pub const stack_overflow_utilities = @import("utilities/stack-overflow.zig");
@@ -26,11 +27,12 @@ pub fn main(init: std.process.Init) !void {
         \\                                  Disables the stack overflow recovery mechanism
         \\<FILE>
         \\
-    );
+    ++ config.params);
 
     const parsers = comptime .{
         .VERBOSITY_LEVEL = clap.parsers.int(u8, 10),
         .ITERATIONS = clap.parsers.int(u32, 10),
+        .INPUT_SIZE = clap.parsers.int(u16, 10),
         .FILE = clap.parsers.string,
     };
     var diag = clap.Diagnostic{};
@@ -61,7 +63,8 @@ pub fn main(init: std.process.Init) !void {
 
     const io = init.io;
 
-    const program_file = if (res.positionals[0]) |path|
+    const input_path = res.positionals[0];
+    const program_file = if (input_path) |path|
         try std.Io.Dir.cwd().openFile(init.io, path, .{
             .mode = .read_only,
             .lock = .exclusive,
@@ -79,6 +82,8 @@ pub fn main(init: std.process.Init) !void {
     var context = data_structures.Context{
         .node_allocator = &allocator,
         .arena_allocator = arena_allocator,
+        .input_path = input_path,
+        .language_options = config.optionsFromArgs(res.args),
         .verbosity = verbosity,
         .io = io,
         .reader = program_file.reader(io, reader_buffer),

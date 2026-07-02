@@ -907,8 +907,8 @@ def sample_inputs(lang_name):
 
 def grammar_benchmark(gen_opts, args):
     inputs = [
-        "languages/grammar/ll.grm",
-        "languages/grammar/lr.grm",
+        "languages/galley/ll.grm",
+        "languages/galley/lr.grm",
         "languages/json/ll.grm",
         "languages/test-ll/ll.grm",
         "languages/test-ll1/ll.grm",

@@ -24,6 +24,8 @@ pub const Context = struct {
     node_allocator: *data_structures.ASTAllocator,
     arena_allocator: std.mem.Allocator,
     io: std.Io,
+    input_path: ?[]const u8 = null,
+    language_options: root.config.Options = .{},
 
     reader: std.Io.File.Reader = undefined,
     chunk_buffer: []u8 = undefined,

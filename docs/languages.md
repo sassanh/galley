@@ -8,7 +8,7 @@
   - [Augmented JSON (`languages/augmented-json`)](#augmented-json-languagesaugmented-json)
   - [Lisp (`languages/lisp`)](#lisp-languageslisp)
   - [Lua (`languages/lua`)](#lua-languageslua)
-  - [Grammar Parser (`languages/grammar`)](#grammar-parser-languagesgrammar)
+  - [Grammar Parser (`languages/galley`)](#grammar-parser-languagesgalley)
 - [Choosing Between LL and LR](#choosing-between-ll-and-lr)
 - [Building and Running Included Languages](#building-and-running-included-languages)
 
@@ -44,7 +44,7 @@ A Lisp grammar covering lists, symbols, numbers, strings, reader macros, comment
 A Lua grammar that demonstrates keyword-led statements, function declarations, returns, function-call expressions, integer literals, strings, comments, and keyed table constructors.
 - **Parser Engines:** `ll.grm` is provided.
 
-### Grammar Parser (`languages/grammar`)
+### Grammar Parser (`languages/galley`)
 The self-hosting definition of Galley's own `.grm` syntax! This language defines the exact structure of rule definitions, alternatives (`|`), variable symbols, quoted literals, and `@` annotations used across the compiler.
 - **Parser Engines:** Both `ll.grm` and `lr.grm` are provided.
 
@@ -76,6 +76,6 @@ scripts/generate-parser --language languages/json --parser-type LL
 zig build -Doptimize=ReleaseFast ll-json -- languages/json/samples/code-01.json
 
 # Generate and test the LR parser for the Grammar specification itself
-scripts/generate-parser --language languages/grammar --parser-type LR
-zig build -Doptimize=ReleaseFast lr-grammar -- languages/grammar/lr.grm
+scripts/generate-parser --language languages/galley --parser-type LR
+zig build -Doptimize=ReleaseFast lr-galley -- languages/galley/lr.grm
 ```

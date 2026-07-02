@@ -329,7 +329,7 @@ _Galley's own grammar file format (`.grm`). This is the self-hosting grammar: Ga
 
 _AST = build syntax tree · Term. = include terminal nodes in tree · Limit = token size limit_
 
-### `languages/grammar/ll.grm`
+### `languages/galley/ll.grm`
 
 | AST | Term. | Limit | LL         | LR         | LL/LR |
 | --- | ----- | ----- | ---------- | ---------- | ----- |
@@ -355,7 +355,7 @@ _AST = build syntax tree · Term. = include terminal nodes in tree · Limit = to
   LR  ✓ast ✓term lim=32  ██████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░      59.5 MB/s
 ```
 
-### `languages/grammar/lr.grm`
+### `languages/galley/lr.grm`
 
 | AST | Term. | Limit | LL         | LR         | LL/LR |
 | --- | ----- | ----- | ---------- | ---------- | ----- |

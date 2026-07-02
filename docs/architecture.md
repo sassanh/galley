@@ -65,6 +65,6 @@ Because this step happens entirely ahead-of-time (AOT), the runtime Zig binary c
 
 ## Self-Hosting Roadmap
 
-Galley already ships with a formal specification of its own grammar syntax (`languages/grammar`). The generated parser can successfully parse and validate `.grm` files at hundreds of megabytes per second.
+Galley already ships with a formal specification of its own grammar syntax (`languages/galley`). The generated parser can successfully parse and validate `.grm` files at hundreds of megabytes per second.
 
 The ultimate roadmap goal is to port the parser table generation algorithms from Python to Zig. Once completed, Galley will become a fully self-hosted, standalone compiler capable of compiling and generating new parsers entirely within a single native binary.
